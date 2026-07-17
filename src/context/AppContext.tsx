@@ -23,7 +23,7 @@ const AIChatContext = createContext<AIChatContextValue | null>(null);
 
 const DEFAULT_MESSAGE: ChatMessage = {
   role: 'assistant',
-  content: "Hello! I'm your Beauty AI Assistant. How can I help you with your skincare today? ✨",
+  content: "Hello! I'm your Beauty AI Assistant. How can I help you with your skincare today?",
 };
 
 export function AppProvider({ children }: { children: ReactNode }) {

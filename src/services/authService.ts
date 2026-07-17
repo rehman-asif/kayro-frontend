@@ -64,10 +64,31 @@ export const userAuthService = {
 
 // ─── Admin Auth ───────────────────────────────────────────────────────────────
 export const adminAuthService = {
+  register: (name: string, email: string, password: string) =>
+    apiFetch<AuthResponse>('/admin/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password }),
+    }),
+
   login: (email: string, password: string) =>
     apiFetch<AuthResponse>('/admin/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
+    }),
+
+  forgotPassword: (email: string) =>
+    apiFetch<{ success: boolean; message: string; data?: { resetUrl: string } }>(
+      '/admin/auth/forgot-password',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }
+    ),
+
+  resetPassword: (token: string, password: string) =>
+    apiFetch<AuthResponse>(`/admin/auth/reset-password/${token}`, {
+      method: 'POST',
+      body: JSON.stringify({ password }),
     }),
 
   logout: () =>

@@ -1,5 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
 
 export function AdminLoginPage() {
@@ -23,7 +23,7 @@ export function AdminLoginPage() {
     setSubmitting(true);
     try {
       await adminLogin(email, password);
-      navigate('/admin'); // Redirect to admin dashboard on success
+      navigate('/admin');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
     } finally {
@@ -43,16 +43,13 @@ export function AdminLoginPage() {
     <div className="auth-page auth-page--admin">
       <div className="auth-card">
         <div className="auth-brand">
-          <div className="auth-brand-icon">🔐</div>
           <h1 className="auth-brand-title">Admin Portal</h1>
-          <p className="auth-brand-sub">Restricted access — administrators only</p>
+          <p className="auth-brand-sub">Sign in to The Precious Creations dashboard</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           {error && (
-            <div className="auth-error" role="alert">
-              <span>⚠️</span> {error}
-            </div>
+            <div className="auth-error" role="alert">{error}</div>
           )}
 
           <div className="auth-field">
@@ -94,11 +91,13 @@ export function AdminLoginPage() {
           </button>
         </form>
 
-        <p className="auth-footer-text" style={{ opacity: 0.5, fontSize: '12px' }}>
-          Not an admin?{' '}
-          <a href="/user/login" className="auth-link">Customer sign in</a>
+        <p className="auth-footer-text">
+          <Link to="/admin/forgot-password" className="auth-link">Forgot password?</Link>
           {' · '}
-          <a href="/" className="auth-link">Return to store</a>
+          <Link to="/admin/register" className="auth-link">Create admin account</Link>
+        </p>
+        <p className="auth-footer-text">
+          <Link to="/" className="auth-link">Return to store</Link>
         </p>
       </div>
     </div>

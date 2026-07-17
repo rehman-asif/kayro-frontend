@@ -1,9 +1,9 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAdmin } from '../context/AuthContext';
+import { useUser } from '../context/AuthContext';
 
 export function LoginPage() {
-  const { admin, adminLogin, isLoading } = useAdmin();
+  const { userLogin, isLoading } = useUser();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -11,19 +11,13 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (admin) {
-      navigate('/admin', { replace: true });
-    }
-  }, [admin, navigate]);
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
     try {
-      await adminLogin(email, password);
-      navigate('/admin', { replace: true });
+      await userLogin(email, password);
+      navigate('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
     } finally {
@@ -43,16 +37,13 @@ export function LoginPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-brand">
-          <div className="auth-brand-icon">✨</div>
           <h1 className="auth-brand-title">Welcome Back</h1>
-          <p className="auth-brand-sub">Sign in to your admin account</p>
+          <p className="auth-brand-sub">Sign in to your account</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
           {error && (
-            <div className="auth-error" role="alert">
-              <span>⚠️</span> {error}
-            </div>
+            <div className="auth-error" role="alert">{error}</div>
           )}
 
           <div className="auth-field">
@@ -95,7 +86,8 @@ export function LoginPage() {
         </form>
 
         <p className="auth-footer-text">
-          <Link to="/" className="auth-link">Return to store</Link>
+          Don&apos;t have an account?{' '}
+          <Link to="/register" className="auth-link">Create one</Link>
         </p>
       </div>
     </div>

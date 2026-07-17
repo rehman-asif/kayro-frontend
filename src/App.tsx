@@ -15,6 +15,9 @@ import { AdminPage } from './pages/AdminPage';
 import { AdminAICenter } from './pages/AdminAICenter';
 import { ProductPublishPage } from './pages/ProductPublishPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AdminRegisterPage } from './pages/AdminRegisterPage';
+import { AdminForgotPasswordPage } from './pages/AdminForgotPasswordPage';
+import { AdminResetPasswordPage } from './pages/AdminResetPasswordPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminHubSpotPage } from './pages/AdminHubSpotPage';
@@ -27,6 +30,9 @@ export default function App() {
           <AppProvider>
             <Routes>
               <Route path="/login" element={<AdminLoginPage />} />
+              <Route path="/admin/register" element={<AdminRegisterPage />} />
+              <Route path="/admin/forgot-password" element={<AdminForgotPasswordPage />} />
+              <Route path="/admin/reset-password/:token" element={<AdminResetPasswordPage />} />
               <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/admin/ai" element={<AdminAICenter />} />

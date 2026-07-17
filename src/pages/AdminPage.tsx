@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
-import { getOpenAIKey } from '../services/storageService';
+import { getOpenAIKey, setOpenAIKey } from '../services/storageService';
 
-// ─── Main Component ──────────────────────────────────────
 export function AdminPage() {
   const { admin, adminLogout } = useAdmin();
   const navigate = useNavigate();
@@ -11,9 +10,12 @@ export function AdminPage() {
   const [loadingInsight, setLoadingInsight] = useState<boolean>(false);
   const [insightError, setInsightError] = useState<string>('');
   const [loggingOut, setLoggingOut] = useState(false);
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [apiKeySaved, setApiKeySaved] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
 
-  // Auto-generate initial insights on mount
   useEffect(() => {
+    setHasApiKey(!!getOpenAIKey());
     void fetchAIInsights();
   }, []);
 
@@ -27,10 +29,21 @@ export function AdminPage() {
     }
   };
 
+  const handleSaveApiKey = (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = apiKeyInput.trim();
+    if (!trimmed) return;
+    setOpenAIKey(trimmed);
+    setApiKeyInput('');
+    setApiKeySaved(true);
+    setHasApiKey(true);
+    setTimeout(() => setApiKeySaved(false), 2500);
+  };
+
   const fetchAIInsights = async () => {
     const key = getOpenAIKey();
     if (!key) {
-      setInsightError('Configure your xAI key to enable instant business insights.');
+      setInsightError('Enter your AI API key below to enable business insights.');
       return;
     }
 
@@ -77,12 +90,11 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
 
   return (
     <div className="db-root">
-      {/* Sidebar */}
       <aside className="db-sidebar">
         <div className="db-sidebar-brand">
           <img src="/logo.png" alt="TPC" className="db-logo" />
           <h2 className="db-sidebar-title">Admin Dashboard</h2>
-          <p className="db-sidebar-sub">Control Center</p>
+          <p className="db-sidebar-sub">The Precious Creations</p>
         </div>
 
         <nav className="db-nav">
@@ -101,7 +113,6 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
         </nav>
 
         <div className="db-sidebar-footer">
-          {/* Admin info */}
           {admin && (
             <div className="db-admin-info">
               <p className="db-admin-name">{admin.name}</p>
@@ -123,22 +134,53 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
         </div>
       </aside>
 
-      {/* Main content column */}
       <main className="db-main">
-        {/* Topbar */}
         <header className="db-topbar">
           <div className="db-topbar-left">
             <h1 className="db-topbar-title">Operations Dashboard</h1>
             <p className="db-topbar-date">
-              Live updates • {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
             </p>
           </div>
 
           <div className="db-actions">
-            <Link to="/admin/publish" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', padding: '8px 16px', height: '36px', boxSizing: 'border-box', lineHeight: '1' }}>
+            <Link
+              to="/admin/publish"
+              className="btn btn-primary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: '13px',
+                padding: '8px 16px',
+                height: '36px',
+                boxSizing: 'border-box',
+                lineHeight: '1',
+              }}
+            >
               <i className="fas fa-plus" /> Publish Product
             </Link>
-            <Link to="/admin/ai" className="btn btn-sm btn-outline" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '13px', color: '#A8A8C0', borderColor: 'rgba(255,255,255,0.15)', padding: '8px 16px', height: '36px', boxSizing: 'border-box', lineHeight: '1' }}>
+            <Link
+              to="/admin/ai"
+              className="btn btn-sm btn-outline"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                fontSize: '13px',
+                color: '#A8A8C0',
+                borderColor: 'rgba(255,255,255,0.15)',
+                padding: '8px 16px',
+                height: '36px',
+                boxSizing: 'border-box',
+                lineHeight: '1',
+              }}
+            >
               <i className="fas fa-brain" /> Open AI Center
             </Link>
             <button
@@ -153,22 +195,55 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
           </div>
         </header>
 
-        {/* Dashboard Content */}
         <div className="db-content">
-          {/* Welcome card */}
           <div className="db-welcome-card">
-            <div className="db-welcome-icon">👋</div>
+            <div className="db-welcome-icon">
+              <i className="fas fa-store" />
+            </div>
             <div>
-              <h2 className="db-welcome-title">
-                Welcome back{admin?.name ? `, ${admin.name}` : ''}!
-              </h2>
+              <h2 className="db-welcome-title">Welcome to The Precious Creations dashboard</h2>
               <p className="db-welcome-sub">
-                Your dashboard is ready. Start by publishing products or using the AI Center to generate content.
+                {admin?.name ? `Signed in as ${admin.name}. ` : ''}
+                Publish products, manage AI content, and grow your store from here.
               </p>
             </div>
           </div>
 
-          {/* Quick Actions */}
+          <section className="db-widget" style={{ maxWidth: 700 }}>
+            <div className="db-widget-header">
+              <h2 className="db-widget-title">AI API Key</h2>
+            </div>
+            <p className="db-welcome-sub" style={{ marginBottom: 12 }}>
+              Enter your xAI / OpenAI API key here. It is saved in this browser and used for AI
+              Center and insights.
+              {hasApiKey ? ' A key is currently saved.' : ' No key saved yet.'}
+            </p>
+            <form className="auth-form" onSubmit={handleSaveApiKey} style={{ maxWidth: '100%' }}>
+              <div className="auth-field">
+                <label htmlFor="admin-api-key" className="auth-label">
+                  API Key
+                </label>
+                <input
+                  id="admin-api-key"
+                  type="password"
+                  className="auth-input"
+                  placeholder="Paste your API key"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+              <button type="submit" className="auth-btn auth-btn--admin" disabled={!apiKeyInput.trim()}>
+                Save API Key
+              </button>
+              {apiKeySaved && (
+                <p className="auth-success" style={{ marginTop: 10 }}>
+                  API key saved.
+                </p>
+              )}
+            </form>
+          </section>
+
           <section className="db-quick-actions">
             <h2 className="db-section-title">Quick Actions</h2>
             <div className="db-actions-grid">
@@ -195,11 +270,15 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
             </div>
           </section>
 
-          {/* AI Insights widget */}
           <div className="db-widget" style={{ maxWidth: 700 }}>
             <div className="db-widget-header">
-              <h2 className="db-widget-title">✨ AI Business Insights</h2>
-              <button type="button" className="db-widget-action" onClick={() => void fetchAIInsights()} disabled={loadingInsight}>
+              <h2 className="db-widget-title">AI Business Insights</h2>
+              <button
+                type="button"
+                className="db-widget-action"
+                onClick={() => void fetchAIInsights()}
+                disabled={loadingInsight}
+              >
                 {loadingInsight ? 'Updating...' : 'Refresh'}
               </button>
             </div>
@@ -210,8 +289,13 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
                 <p style={{ fontSize: '13px', margin: 0 }}>Generating business insights...</p>
               </div>
             ) : insightError ? (
-              <div className="db-ai-insight-box" style={{ borderStyle: 'solid', borderColor: 'rgba(239, 68, 68, 0.2)' }}>
-                <p className="pp-error" style={{ margin: 0 }}>{insightError}</p>
+              <div
+                className="db-ai-insight-box"
+                style={{ borderStyle: 'solid', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+              >
+                <p className="pp-error" style={{ margin: 0 }}>
+                  {insightError}
+                </p>
               </div>
             ) : aiInsight ? (
               <div className="db-ai-insight-box">

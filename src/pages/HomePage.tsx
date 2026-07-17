@@ -58,6 +58,21 @@ export function HomePage() {
         <div className="quote-block">&quot;Healthy skin is a reflection of overall wellness.&quot;</div>
       </SplitSection>
 
+      <section className="section" style={{ background: 'var(--cream)' }}>
+        <div className="container">
+          <SectionHeader tag="Artisan Craftsmanship" title="The Legacy of Artisan Craftsmanship" />
+          <p style={{
+            maxWidth: 800, margin: '0 auto', textAlign: 'center',
+            color: 'var(--charcoal-light)', fontSize: 17, lineHeight: 1.8,
+          }}>
+            Every creation at The Precious Creations is thoughtfully handcrafted in Maseru,
+            where time-honoured artistry meets modern skincare science. From our signature soaps
+            to our nourishing serums and botanical oils, each formulation is meticulously
+            prepared with exceptional care, precision, and attention to detail.
+          </p>
+        </div>
+      </section>
+
       <WhyChooseGrid />
 
       <section className="section" style={{ background: 'var(--white)' }}>

@@ -126,7 +126,7 @@ export function AdminAICenter() {
                     style={isActive ? { '--item-accent': ACCENT_MAP[id] } as React.CSSProperties : undefined}
                     onClick={() => switchAssistant(id)}
                   >
-                    <span className="aic-nav-icon">{a.icon}</span>
+                    <span className="aic-nav-icon"><i className={a.icon} /></span>
                     <span className="aic-nav-label">{a.name}</span>
                     {sessions[id].messages.length > 0 && (
                       <span className="aic-nav-badge">{sessions[id].messages.filter(m => m.role === 'user').length}</span>
@@ -160,7 +160,7 @@ export function AdminAICenter() {
             </button>
             <div className="aic-topbar-info">
               <span className="aic-topbar-icon" style={{ background: `${accent}22`, color: accent }}>
-                {active.icon}
+                <i className={active.icon} />
               </span>
               <div>
                 <h1 className="aic-topbar-title">{active.name}</h1>
@@ -184,7 +184,7 @@ export function AdminAICenter() {
           {session.messages.length === 0 ? (
             <div className="aic-empty">
               <div className="aic-empty-icon" style={{ background: `${accent}18`, color: accent }}>
-                {active.icon}
+                <i className={active.icon} />
               </div>
               <h2 className="aic-empty-title">{active.name}</h2>
               <p className="aic-empty-desc">{active.description}</p>
@@ -211,7 +211,7 @@ export function AdminAICenter() {
                 <div key={i} className={`aic-msg aic-msg--${msg.role}`}>
                   {msg.role === 'assistant' && (
                     <div className="aic-msg-avatar" style={{ background: `${accent}22`, color: accent }}>
-                      {active.icon}
+                      <i className={active.icon} />
                     </div>
                   )}
                   <div className="aic-msg-bubble" style={
@@ -231,7 +231,7 @@ export function AdminAICenter() {
               {session.loading && (
                 <div className="aic-msg aic-msg--assistant">
                   <div className="aic-msg-avatar" style={{ background: `${accent}22`, color: accent }}>
-                    {active.icon}
+                    <i className={active.icon} />
                   </div>
                   <div className="aic-msg-bubble aic-msg-bubble--typing">
                     <span className="aic-dot" />

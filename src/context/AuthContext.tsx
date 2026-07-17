@@ -25,6 +25,7 @@ interface AuthContextValue {
   admin: AuthUser | null;
   isAdminAuthenticated: boolean;
   adminLogin: (email: string, password: string) => Promise<void>;
+  adminRegister: (name: string, email: string, password: string) => Promise<void>;
   adminLogout: () => Promise<void>;
 }
 
@@ -93,6 +94,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAdmin(res.data);
   }, []);
 
+  const adminRegister = useCallback(async (name: string, email: string, password: string) => {
+    const res = await adminAuthService.register(name, email, password);
+    setAdmin(res.data);
+  }, []);
+
   const adminLogout = useCallback(async () => {
     await adminAuthService.logout();
     setAdmin(null);
@@ -110,9 +116,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       admin,
       isAdminAuthenticated: !!admin,
       adminLogin,
+      adminRegister,
       adminLogout,
     }),
-    [isLoading, user, userLogin, userRegister, userLogout, admin, adminLogin, adminLogout]
+    [isLoading, user, userLogin, userRegister, userLogout, admin, adminLogin, adminRegister, adminLogout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -131,6 +138,6 @@ export function useUser() {
 }
 
 export function useAdmin() {
-  const { admin, isAdminAuthenticated, adminLogin, adminLogout, isLoading } = useAuth();
-  return { admin, isAdminAuthenticated, adminLogin, adminLogout, isLoading };
+  const { admin, isAdminAuthenticated, adminLogin, adminRegister, adminLogout, isLoading } = useAuth();
+  return { admin, isAdminAuthenticated, adminLogin, adminRegister, adminLogout, isLoading };
 }

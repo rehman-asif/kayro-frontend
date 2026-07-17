@@ -20,23 +20,23 @@ const CATEGORIES: ProductCategory[] = [
 ];
 
 const STEPS = [
-  { n: 1, label: 'Upload Image',    icon: '🖼️' },
-  { n: 2, label: 'Product Details', icon: '📋' },
-  { n: 3, label: 'AI Marketing',    icon: '🤖' },
-  { n: 4, label: 'Review & Edit',   icon: '✏️' },
-  { n: 5, label: 'Publish',         icon: '🚀' },
+  { n: 1, label: 'Upload Image',    icon: 'fas fa-image' },
+  { n: 2, label: 'Product Details', icon: 'fas fa-list' },
+  { n: 3, label: 'AI Marketing',    icon: 'fas fa-robot' },
+  { n: 4, label: 'Review & Edit',   icon: 'fas fa-pen' },
+  { n: 5, label: 'Publish',         icon: 'fas fa-check' },
 ];
 
 const MARKETING_FIELDS: { key: keyof AIMarketingContent; label: string; icon: string; rows: number }[] = [
-  { key: 'productDescription',  label: 'Product Description',        icon: '📝', rows: 5 },
-  { key: 'instagramCaption',    label: 'Instagram Caption',           icon: '📸', rows: 5 },
-  { key: 'tiktokCaption',       label: 'TikTok Caption',              icon: '🎵', rows: 5 },
-  { key: 'facebookCaption',     label: 'Facebook Caption',            icon: '👥', rows: 5 },
-  { key: 'hashtags',            label: 'Hashtags',                    icon: '#️⃣', rows: 5 },
-  { key: 'campaignIdeas',       label: 'Marketing Campaign Ideas',    icon: '🎯', rows: 5 },
-  { key: 'customerTarget',      label: 'Customer Target Profile',     icon: '🎪', rows: 5 },
-  { key: 'emailMessage',        label: 'Email Message',               icon: '📧', rows: 5 },
-  { key: 'whatsappMessage',     label: 'WhatsApp Message',            icon: '💬', rows: 5 },
+  { key: 'productDescription',  label: 'Product Description',        icon: 'fas fa-align-left', rows: 5 },
+  { key: 'instagramCaption',    label: 'Instagram Caption',           icon: 'fab fa-instagram', rows: 5 },
+  { key: 'tiktokCaption',       label: 'TikTok Caption',              icon: 'fab fa-tiktok', rows: 5 },
+  { key: 'facebookCaption',     label: 'Facebook Caption',            icon: 'fab fa-facebook', rows: 5 },
+  { key: 'hashtags',            label: 'Hashtags',                    icon: 'fas fa-hashtag', rows: 5 },
+  { key: 'campaignIdeas',       label: 'Marketing Campaign Ideas',    icon: 'fas fa-bullseye', rows: 5 },
+  { key: 'customerTarget',      label: 'Customer Target Profile',     icon: 'fas fa-user', rows: 5 },
+  { key: 'emailMessage',        label: 'Email Message',               icon: 'fas fa-envelope', rows: 5 },
+  { key: 'whatsappMessage',     label: 'WhatsApp Message',            icon: 'fab fa-whatsapp', rows: 5 },
 ];
 
 const emptyMarketing = (): AIMarketingContent => ({
@@ -242,7 +242,7 @@ export function ProductPublishPage() {
                 {step > s.n ? <i className="fas fa-check" /> : s.n}
               </div>
               <div className="pp-step-info">
-                <span className="pp-step-icon">{s.icon}</span>
+                <span className="pp-step-icon"><i className={s.icon} /></span>
                 <span className="pp-step-label">{s.label}</span>
               </div>
             </div>
@@ -260,7 +260,7 @@ export function ProductPublishPage() {
         {/* Header */}
         <div className="pp-topbar">
           <div className="pp-topbar-step">Step {step} of 5</div>
-          <h1 className="pp-topbar-title">{STEPS[step - 1].icon} {STEPS[step - 1].label}</h1>
+          <h1 className="pp-topbar-title"><i className={STEPS[step - 1].icon} /> {STEPS[step - 1].label}</h1>
           <div className="pp-progress-bar">
             <div className="pp-progress-fill" style={{ width: `${(step / 5) * 100}%` }} />
           </div>
@@ -331,16 +331,7 @@ export function ProductPublishPage() {
                 </div>
               )}
 
-              {!import.meta.env.VITE_CLOUDINARY_CLOUD_NAME && (
-                <div className="pp-info-box">
-                  <i className="fas fa-info-circle" />
-                  <div>
-                    <strong>Cloudinary not configured yet.</strong>
-                    <p>Add <code>VITE_CLOUDINARY_CLOUD_NAME</code> and <code>VITE_CLOUDINARY_UPLOAD_PRESET</code> to your <code>.env.local</code> file to enable image uploads.</p>
-                    <p style={{ marginTop: 6 }}>For now, you can <button type="button" className="pp-skip-link" onClick={() => { setImageUrl('https://via.placeholder.com/600x600?text=Product+Image'); setStep(2); }}>skip with a placeholder image →</button></p>
-                  </div>
-                </div>
-              )}
+              {/* Uploads use the signed backend Cloudinary integration */}
             </div>
           )}
 
@@ -419,7 +410,7 @@ export function ProductPublishPage() {
                 {MARKETING_FIELDS.map(({ key, label, icon, rows }) => (
                   <div key={key} className="pp-marketing-field">
                     <div className="pp-marketing-label">
-                      <span>{icon} {label}</span>
+                      <span><i className={icon} /> {label}</span>
                       <button
                         type="button"
                         className="pp-regen-btn"
@@ -438,7 +429,7 @@ export function ProductPublishPage() {
                       rows={rows}
                       value={marketing[key]}
                       onChange={(e) => setMarketing({ ...marketing, [key]: e.target.value })}
-                      placeholder={generatingField === key || generatingAll ? '✨ Generating…' : `Click "Generate All" or the ↺ button`}
+                      placeholder={generatingField === key || generatingAll ? 'Generating…' : 'Click Generate All or regenerate'}
                     />
                   </div>
                 ))}
@@ -467,7 +458,7 @@ export function ProductPublishPage() {
                 <div className="pp-review-fields">
                   {MARKETING_FIELDS.map(({ key, label, icon, rows }) => (
                     <div key={key} className="pp-review-field">
-                      <label className="pp-label">{icon} {label}</label>
+                      <label className="pp-label"><i className={icon} /> {label}</label>
                       <textarea
                         className="pp-marketing-textarea"
                         rows={rows}

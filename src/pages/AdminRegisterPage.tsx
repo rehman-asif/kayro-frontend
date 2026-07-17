@@ -1,9 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useUser } from '../context/AuthContext';
+import { useAdmin } from '../context/AuthContext';
 
-export function RegisterPage() {
-  const { userRegister, isLoading } = useUser();
+export function AdminRegisterPage() {
+  const { admin, adminRegister, isLoading } = useAdmin();
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
@@ -12,21 +12,19 @@ export function RegisterPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (admin) navigate('/admin');
+  }, [admin, navigate]);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
-      return;
-    }
-
     setSubmitting(true);
     try {
-      await userRegister(name, email, password);
-      navigate('/'); // Redirect to home on success
+      await adminRegister(name, email, password);
+      navigate('/admin');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {
       setSubmitting(false);
     }
@@ -41,25 +39,22 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page--admin">
       <div className="auth-card">
         <div className="auth-brand">
-          <h1 className="auth-brand-title">Create Account</h1>
-          <p className="auth-brand-sub">Join The Precious Creations today</p>
+          <h1 className="auth-brand-title">Create Admin Account</h1>
+          <p className="auth-brand-sub">Register for The Precious Creations dashboard</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
-          {error && (
-            <div className="auth-error" role="alert">{error}</div>
-          )}
+          {error && <div className="auth-error" role="alert">{error}</div>}
 
           <div className="auth-field">
-            <label htmlFor="register-name" className="auth-label">Full Name</label>
+            <label htmlFor="admin-reg-name" className="auth-label">Full Name</label>
             <input
-              id="register-name"
+              id="admin-reg-name"
               type="text"
               className="auth-input"
-              placeholder="Jane Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -68,12 +63,11 @@ export function RegisterPage() {
           </div>
 
           <div className="auth-field">
-            <label htmlFor="register-email" className="auth-label">Email Address</label>
+            <label htmlFor="admin-reg-email" className="auth-label">Email</label>
             <input
-              id="register-email"
+              id="admin-reg-email"
               type="email"
               className="auth-input"
-              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -82,25 +76,22 @@ export function RegisterPage() {
           </div>
 
           <div className="auth-field">
-            <label htmlFor="register-password" className="auth-label">
-              Password <span className="auth-label-hint">(min. 6 characters)</span>
-            </label>
+            <label htmlFor="admin-reg-password" className="auth-label">Password</label>
             <input
-              id="register-password"
+              id="admin-reg-password"
               type="password"
               className="auth-input"
-              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
               autoComplete="new-password"
             />
           </div>
 
           <button
-            id="register-submit"
             type="submit"
-            className="auth-btn"
+            className="auth-btn auth-btn--admin"
             disabled={submitting || !name || !email || !password}
           >
             {submitting ? <span className="auth-btn-spinner" /> : 'Create Account'}
@@ -108,8 +99,7 @@ export function RegisterPage() {
         </form>
 
         <p className="auth-footer-text">
-          Already have an account?{' '}
-          <Link to="/user/login" className="auth-link">Sign in</Link>
+          Already have an account? <Link to="/login" className="auth-link">Sign in</Link>
         </p>
       </div>
     </div>
