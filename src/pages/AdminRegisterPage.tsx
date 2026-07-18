@@ -1,10 +1,9 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
 
 export function AdminRegisterPage() {
   const { admin, adminRegister, isLoading } = useAdmin();
-  const navigate = useNavigate();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -13,8 +12,10 @@ export function AdminRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (admin) navigate('/admin', { replace: true });
-  }, [admin, navigate]);
+    if (!isLoading && admin) {
+      window.location.assign('/admin');
+    }
+  }, [admin, isLoading]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -22,10 +23,9 @@ export function AdminRegisterPage() {
     setSubmitting(true);
     try {
       await adminRegister(name, email, password);
-      navigate('/admin', { replace: true });
+      window.location.assign('/admin');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
-    } finally {
       setSubmitting(false);
     }
   };

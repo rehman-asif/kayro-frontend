@@ -1,21 +1,21 @@
 import { useState, useEffect, type FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
 
 export function AdminLoginPage() {
   const { admin, adminLogin, isLoading } = useAdmin();
-  const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Already signed in — hard navigate so AdminLayout always mounts with session
   useEffect(() => {
-    if (admin) {
-      navigate('/admin', { replace: true });
+    if (!isLoading && admin) {
+      window.location.assign('/admin');
     }
-  }, [admin, navigate]);
+  }, [admin, isLoading]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -23,10 +23,10 @@ export function AdminLoginPage() {
     setSubmitting(true);
     try {
       await adminLogin(email, password);
-      navigate('/admin', { replace: true });
+      // Full page navigation avoids React Router / layout race conditions
+      window.location.assign('/admin');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
-    } finally {
       setSubmitting(false);
     }
   };

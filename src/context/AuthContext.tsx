@@ -10,19 +10,34 @@ import {
 import { flushSync } from 'react-dom';
 import { userAuthService, adminAuthService, type AuthUser } from '../services/authService';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-interface AuthContextValue {
-  // Shared state
-  isLoading: boolean;
+const ADMIN_SESSION_KEY = 'tpc_admin_session';
 
-  // User Auth
+function readCachedAdmin(): AuthUser | null {
+  try {
+    const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as AuthUser;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedAdmin(admin: AuthUser | null): void {
+  try {
+    if (admin) sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(admin));
+    else sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  } catch {
+    // Ignore quota / private-mode errors
+  }
+}
+
+interface AuthContextValue {
+  isLoading: boolean;
   user: AuthUser | null;
   isUserAuthenticated: boolean;
   userLogin: (email: string, password: string) => Promise<void>;
   userRegister: (name: string, email: string, password: string) => Promise<void>;
   userLogout: () => Promise<void>;
-
-  // Admin Auth
   admin: AuthUser | null;
   isAdminAuthenticated: boolean;
   adminLogin: (email: string, password: string) => Promise<void>;
@@ -30,19 +45,17 @@ interface AuthContextValue {
   adminLogout: () => Promise<void>;
 }
 
-// ─── Context ──────────────────────────────────────────────────────────────────
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [admin, setAdmin] = useState<AuthUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Start true to check session on mount
+  const [admin, setAdmin] = useState<AuthUser | null>(() => readCachedAdmin());
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ── On mount: restore session from cookie (validate with /me endpoints) ──────
   useEffect(() => {
     const restoreSession = async () => {
       setIsLoading(true);
+
       try {
         const res = await userAuthService.getMe();
         if (res.success) setUser(res.data);
@@ -55,25 +68,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // No valid user session
         }
       }
+
       try {
         const res = await adminAuthService.getMe();
-        if (res.success) setAdmin(res.data);
+        if (res.success) {
+          writeCachedAdmin(res.data);
+          setAdmin(res.data);
+        }
       } catch {
         try {
           await adminAuthService.refreshToken();
           const res = await adminAuthService.getMe();
-          if (res.success) setAdmin(res.data);
+          if (res.success) {
+            writeCachedAdmin(res.data);
+            setAdmin(res.data);
+          }
         } catch {
-          // No valid admin session
+          // Cookie restore failed — keep a same-tab session cache from a fresh login
+          const cached = readCachedAdmin();
+          setAdmin(cached);
         }
       }
+
       setIsLoading(false);
     };
 
     void restoreSession();
   }, []);
 
-  // ── User Actions ──────────────────────────────────────────────────────────────
   const userLogin = useCallback(async (email: string, password: string) => {
     const res = await userAuthService.login(email, password);
     setUser(res.data);
@@ -89,10 +111,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
-  // ── Admin Actions ─────────────────────────────────────────────────────────────
-  // flushSync so /admin layout sees admin before navigate() runs (avoids bounce to /login)
   const adminLogin = useCallback(async (email: string, password: string) => {
     const res = await adminAuthService.login(email, password);
+    writeCachedAdmin(res.data);
     flushSync(() => {
       setAdmin(res.data);
     });
@@ -100,19 +121,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const adminRegister = useCallback(async (name: string, email: string, password: string) => {
     const res = await adminAuthService.register(name, email, password);
+    writeCachedAdmin(res.data);
     flushSync(() => {
       setAdmin(res.data);
     });
   }, []);
 
   const adminLogout = useCallback(async () => {
-    await adminAuthService.logout();
-    flushSync(() => {
-      setAdmin(null);
-    });
+    try {
+      await adminAuthService.logout();
+    } finally {
+      writeCachedAdmin(null);
+      flushSync(() => {
+        setAdmin(null);
+      });
+    }
   }, []);
 
-  // ── Context Value ──────────────────────────────────────────────────────────────
   const value = useMemo<AuthContextValue>(
     () => ({
       isLoading,
@@ -133,7 +158,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// ─── Hooks ────────────────────────────────────────────────────────────────────
 export function useAuth(): AuthContextValue {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
