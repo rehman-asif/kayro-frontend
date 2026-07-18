@@ -1,1 +1,5 @@
+# Proxy API to Railway (must be above SPA fallback)
+/api/*  https://kayro-backend-production.up.railway.app/api/:splat  200!
+
+# SPA fallback
 /*    /index.html   200

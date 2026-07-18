@@ -15,6 +15,13 @@ async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise
     },
   });
 
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error(
+      'API did not return JSON. The /api proxy may be misconfigured — check Netlify redirects.'
+    );
+  }
+
   const data = await res.json();
 
   if (!res.ok) {

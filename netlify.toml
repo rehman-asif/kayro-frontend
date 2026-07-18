@@ -1,12 +1,12 @@
 [build]
-  base = "/"
   command = "npm run build"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20"
 
-# Proxy API to Railway so auth cookies are first-party on Netlify
+# Proxy API to Railway so auth cookies are first-party on Netlify.
+# Also mirrored in public/_redirects (copied into dist) so it always applies.
 [[redirects]]
   from = "/api/*"
   to = "https://kayro-backend-production.up.railway.app/api/:splat"
@@ -18,3 +18,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
