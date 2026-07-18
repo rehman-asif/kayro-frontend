@@ -4,6 +4,7 @@ export function getOpenAIKey(): string {
   // Clear any old cached keys from localStorage
   localStorage.removeItem('tpc_openai_key');
   return localStorage.getItem(AI_KEY_STORAGE)
+    || import.meta.env.VITE_GROQ_API_KEY
     || import.meta.env.VITE_XAI_API_KEY
     || import.meta.env.VITE_OPENAI_API_KEY
     || '';

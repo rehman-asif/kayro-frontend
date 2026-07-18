@@ -140,17 +140,17 @@ export function ProductPublishPage() {
   const generateField = async (field: keyof AIMarketingContent) => {
     const apiKey = getOpenAIKey();
     if (!apiKey) {
-      setAiError('xAI API key not found. Check your .env.local file.');
+      setAiError('Groq API key not found. Check your .env.local file.');
       return;
     }
     setGeneratingField(field);
     setAiError('');
     try {
-      const res = await fetch('https://api.x.ai/v1/chat/completions', {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
         body: JSON.stringify({
-          model: 'grok-4.5',
+          model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: 'You are an expert marketing copywriter for a premium skincare brand. Be creative, concise, and brand-consistent.' },
             { role: 'user', content: buildPrompt(field) },
@@ -176,7 +176,7 @@ export function ProductPublishPage() {
   const generateAll = async () => {
     const apiKey = getOpenAIKey();
     if (!apiKey) {
-      setAiError('xAI API key not found. Check your .env.local file.');
+      setAiError('Groq API key not found. Check your .env.local file.');
       return;
     }
     setGeneratingAll(true);
@@ -389,7 +389,7 @@ export function ProductPublishPage() {
               <div className="pp-ai-header">
                 <div>
                   <h2 className="pp-card-title">AI Marketing Assistant</h2>
-                  <p className="pp-card-desc">Generating marketing content for <strong>{form.name}</strong> using xAI Grok.</p>
+                  <p className="pp-card-desc">Generating marketing content for <strong>{form.name}</strong> using Groq.</p>
                 </div>
                 <button
                   type="button"

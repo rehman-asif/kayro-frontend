@@ -170,7 +170,7 @@ export function AdminAICenter() {
           </div>
           <div className="aic-topbar-right">
             <span className="aic-status-dot" />
-            <span className="aic-status-label">xAI Grok • Live</span>
+            <span className="aic-status-label">Groq • Live</span>
             {session.messages.length > 0 && (
               <button type="button" className="aic-clear-btn" onClick={clearChat}>
                 <i className="fas fa-trash-alt" /> Clear
@@ -273,7 +273,7 @@ export function AdminAICenter() {
             </button>
           </div>
           <p className="aic-input-hint">
-            Powered by <strong>xAI Grok</strong> · {active.name}
+            Powered by <strong>Groq</strong> · {active.name}
           </p>
         </div>
       </div>

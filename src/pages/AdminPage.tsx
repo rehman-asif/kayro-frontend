@@ -57,14 +57,14 @@ Based on the current store state (no live data available yet), provide 2 short, 
 Keep the tone professional, direct, and constructive. Do not output markdown codeblocks, just the paragraphs or lists.`;
 
     try {
-      const response = await fetch('https://api.x.ai/v1/chat/completions', {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${key}`,
         },
         body: JSON.stringify({
-          model: 'grok-4.5',
+          model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: 'You are a helpful business operations assistant.' },
             { role: 'user', content: prompt },
@@ -214,7 +214,7 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
               <h2 className="db-widget-title">AI API Key</h2>
             </div>
             <p className="db-welcome-sub" style={{ marginBottom: 12 }}>
-              Enter your xAI / OpenAI API key here. It is saved in this browser and used for AI
+              Enter your Groq API key here. It is saved in this browser and used for AI
               Center and insights.
               {hasApiKey ? ' A key is currently saved.' : ' No key saved yet.'}
             </p>
