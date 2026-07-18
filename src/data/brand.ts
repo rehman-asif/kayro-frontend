@@ -2,7 +2,7 @@ import type { SocialLink } from '../types';
 
 export const BRAND = {
   name: 'The Precious Creations',
-  tagline: 'Nourishing Skin From The Inside Out',
+  tagline: "Nature's Touch, Your Skin's Glow.",
   ticker: 'Naturally Made, Consciously Crafted, Uniquely You.',
   description: 'Premium skincare and wellness brand based in Maseru, Lesotho.',
   location: 'NRH Mall, Room 13, Top Floor, Kingsway, Maseru, Lesotho',
