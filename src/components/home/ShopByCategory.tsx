@@ -14,8 +14,8 @@ export function ShopByCategory() {
 
       <div className="container">
         <header className="category-section-header">
-          <h2>Shop By Category</h2>
-          <p>Discover products made to nourish your skin and hair naturally</p>
+          <h2>Our Signature Range</h2>
+          <p>Serums, soaps, hair care, body care, bundles, diffusers, and perfumes — handcrafted for every ritual</p>
         </header>
 
         <div className="category-grid">

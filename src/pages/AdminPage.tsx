@@ -2,6 +2,17 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
 import { getOpenAIKey, setOpenAIKey } from '../services/storageService';
+import { PRODUCTS } from '../data/products';
+import { getPublishedProducts, syncPublishedProductsFromApi } from '../services/productService';
+
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
+
+interface DashStats {
+  totalProducts: number;
+  inventoryStatus: { inStock: number; lowStock: number; outOfStock: number };
+  topProducts: { id: string; name: string; category: string; price: number; stock: number; featured?: boolean }[];
+  lowStockItems: { name: string; stock: number }[];
+}
 
 export function AdminPage() {
   const { admin, adminLogout } = useAdmin();
@@ -13,11 +24,52 @@ export function AdminPage() {
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [apiKeySaved, setApiKeySaved] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [stats, setStats] = useState<DashStats | null>(null);
 
   useEffect(() => {
     setHasApiKey(!!getOpenAIKey());
     void fetchAIInsights();
+    void loadStats();
   }, []);
+
+  const loadStats = async () => {
+    await syncPublishedProductsFromApi();
+    try {
+      const res = await fetch(`${API_BASE}/products/stats`, { credentials: 'include' });
+      if (res.ok) {
+        const json = await res.json() as { success: boolean; data: DashStats };
+        if (json.success) {
+          setStats(json.data);
+          return;
+        }
+      }
+    } catch {
+      // fall through to local fallback
+    }
+
+    const published = getPublishedProducts();
+    const catalogCount = PRODUCTS.length + published.length;
+    setStats({
+      totalProducts: catalogCount,
+      inventoryStatus: {
+        inStock: catalogCount,
+        lowStock: 0,
+        outOfStock: PRODUCTS.filter((p) => p.comingSoon).length,
+      },
+      topProducts: PRODUCTS.filter((p) => p.featured).slice(0, 5).map((p) => ({
+        id: p.id,
+        name: p.name,
+        category: p.category,
+        price: p.price,
+        stock: p.comingSoon ? 0 : 25,
+        featured: true,
+      })),
+      lowStockItems: PRODUCTS.filter((p) => p.comingSoon).slice(0, 3).map((p) => ({
+        name: p.name,
+        stock: 0,
+      })),
+    });
+  };
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -87,6 +139,24 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
       setLoadingInsight(false);
     }
   };
+
+  const publishedCount = getPublishedProducts().length;
+  const notifications = [
+    {
+      text: publishedCount
+        ? `${publishedCount} product(s) published from Admin this session.`
+        : 'No newly published products yet — use Publish Product to add one.',
+      time: 'Just now',
+    },
+    {
+      text: 'Cloudinary image uploads are ready for admin product publishing.',
+      time: 'System',
+    },
+    {
+      text: 'Sales, orders, and revenue will update when checkout orders are connected.',
+      time: 'Note',
+    },
+  ];
 
   return (
     <div className="db-root">
@@ -209,6 +279,173 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
             </div>
           </div>
 
+          <div className="db-grid-4">
+            <div className="db-metric-card">
+              <div className="db-metric-header">
+                <span className="db-metric-label">Total Sales</span>
+                <div className="db-metric-icon-box" style={{ background: 'rgba(34,197,94,0.15)', color: '#22C55E' }}>
+                  <i className="fas fa-chart-line" />
+                </div>
+              </div>
+              <div className="db-metric-value">M0.00</div>
+              <div className="db-metric-footer">
+                <span className="db-trend-neutral">Pending orders</span>
+                <span className="db-trend-sub">live after checkout</span>
+              </div>
+            </div>
+            <div className="db-metric-card">
+              <div className="db-metric-header">
+                <span className="db-metric-label">Today&apos;s Revenue</span>
+                <div className="db-metric-icon-box" style={{ background: 'rgba(59,130,246,0.15)', color: '#3B82F6' }}>
+                  <i className="fas fa-coins" />
+                </div>
+              </div>
+              <div className="db-metric-value">M0.00</div>
+              <div className="db-metric-footer">
+                <span className="db-trend-neutral">No sales yet</span>
+              </div>
+            </div>
+            <div className="db-metric-card">
+              <div className="db-metric-header">
+                <span className="db-metric-label">Orders</span>
+                <div className="db-metric-icon-box" style={{ background: 'rgba(168,85,247,0.15)', color: '#A855F7' }}>
+                  <i className="fas fa-shopping-bag" />
+                </div>
+              </div>
+              <div className="db-metric-value">0</div>
+              <div className="db-metric-footer">
+                <span className="db-trend-sub">Awaiting first order</span>
+              </div>
+            </div>
+            <div className="db-metric-card">
+              <div className="db-metric-header">
+                <span className="db-metric-label">Customers</span>
+                <div className="db-metric-icon-box" style={{ background: 'rgba(249,115,22,0.15)', color: '#F97316' }}>
+                  <i className="fas fa-users" />
+                </div>
+              </div>
+              <div className="db-metric-value">0</div>
+              <div className="db-metric-footer">
+                <span className="db-trend-sub">Synced via HubSpot when available</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="db-layout-split">
+            <div className="db-col">
+              <section className="db-widget">
+                <div className="db-widget-header">
+                  <h2 className="db-widget-title">Inventory Status</h2>
+                  <span className="db-trend-sub">{stats?.totalProducts ?? '—'} products</span>
+                </div>
+                <div className="db-grid-4" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                  <div>
+                    <div className="db-metric-value" style={{ fontSize: '1.4rem' }}>{stats?.inventoryStatus.inStock ?? 0}</div>
+                    <div className="db-metric-label">In stock</div>
+                  </div>
+                  <div>
+                    <div className="db-metric-value" style={{ fontSize: '1.4rem', color: '#F59E0B' }}>{stats?.inventoryStatus.lowStock ?? 0}</div>
+                    <div className="db-metric-label">Low stock</div>
+                  </div>
+                  <div>
+                    <div className="db-metric-value" style={{ fontSize: '1.4rem', color: '#EF4444' }}>{stats?.inventoryStatus.outOfStock ?? 0}</div>
+                    <div className="db-metric-label">Out of stock</div>
+                  </div>
+                </div>
+                {(stats?.lowStockItems?.length ?? 0) > 0 && (
+                  <div className="db-stock-indicator" style={{ marginTop: 8 }}>
+                    {stats!.lowStockItems.map((item) => (
+                      <div key={item.name} className="db-stock-meta">
+                        <span className="db-stock-name">{item.name}</span>
+                        <span className={`db-stock-count ${item.stock === 0 ? 'out' : 'low'}`}>
+                          {item.stock === 0 ? 'Out' : `${item.stock} left`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section className="db-widget">
+                <div className="db-widget-header">
+                  <h2 className="db-widget-title">Top Products</h2>
+                </div>
+                <div className="db-stock-indicator">
+                  {(stats?.topProducts ?? []).map((p) => (
+                    <div key={p.id} className="db-stock-meta">
+                      <span className="db-stock-name">{p.name}</span>
+                      <span className="db-stock-count" style={{ color: '#A8A8C0' }}>M{p.price}</span>
+                    </div>
+                  ))}
+                  {!stats?.topProducts?.length && (
+                    <p className="db-welcome-sub" style={{ margin: 0 }}>Publish products to see rankings here.</p>
+                  )}
+                </div>
+              </section>
+            </div>
+
+            <div className="db-col">
+              <section className="db-widget">
+                <div className="db-widget-header">
+                  <h2 className="db-widget-title">Notifications</h2>
+                </div>
+                <div className="db-notif-list">
+                  {notifications.map((n) => (
+                    <div key={n.text} className="db-notif-item">
+                      <span className="db-notif-dot" />
+                      <div className="db-notif-content">
+                        <p className="db-notif-text">{n.text}</p>
+                        <span className="db-notif-time">{n.time}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="db-widget">
+                <div className="db-widget-header">
+                  <h2 className="db-widget-title">AI Business Insights</h2>
+                  <button
+                    type="button"
+                    className="db-widget-action"
+                    onClick={() => void fetchAIInsights()}
+                    disabled={loadingInsight}
+                  >
+                    {loadingInsight ? 'Updating...' : 'Refresh'}
+                  </button>
+                </div>
+
+                {loadingInsight ? (
+                  <div className="db-ai-insight-loading">
+                    <span className="pp-spinner" />
+                    <p style={{ fontSize: '13px', margin: 0 }}>Generating business insights...</p>
+                  </div>
+                ) : insightError ? (
+                  <div
+                    className="db-ai-insight-box"
+                    style={{ borderStyle: 'solid', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                  >
+                    <p className="pp-error" style={{ margin: 0 }}>
+                      {insightError}
+                    </p>
+                  </div>
+                ) : aiInsight ? (
+                  <div className="db-ai-insight-box">
+                    <div className="db-ai-insight-header">
+                      <i className="fas fa-brain" />
+                      <span>RECOMMENDATIONS</span>
+                    </div>
+                    <div className="db-ai-insight-text">
+                      {aiInsight.split('\n').map((line, idx) => (
+                        <p key={idx}>{line}</p>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </section>
+            </div>
+          </div>
+
           <section className="db-widget" style={{ maxWidth: 700 }}>
             <div className="db-widget-header">
               <h2 className="db-widget-title">AI API Key</h2>
@@ -269,48 +506,6 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
               </Link>
             </div>
           </section>
-
-          <div className="db-widget" style={{ maxWidth: 700 }}>
-            <div className="db-widget-header">
-              <h2 className="db-widget-title">AI Business Insights</h2>
-              <button
-                type="button"
-                className="db-widget-action"
-                onClick={() => void fetchAIInsights()}
-                disabled={loadingInsight}
-              >
-                {loadingInsight ? 'Updating...' : 'Refresh'}
-              </button>
-            </div>
-
-            {loadingInsight ? (
-              <div className="db-ai-insight-loading">
-                <span className="pp-spinner" />
-                <p style={{ fontSize: '13px', margin: 0 }}>Generating business insights...</p>
-              </div>
-            ) : insightError ? (
-              <div
-                className="db-ai-insight-box"
-                style={{ borderStyle: 'solid', borderColor: 'rgba(239, 68, 68, 0.2)' }}
-              >
-                <p className="pp-error" style={{ margin: 0 }}>
-                  {insightError}
-                </p>
-              </div>
-            ) : aiInsight ? (
-              <div className="db-ai-insight-box">
-                <div className="db-ai-insight-header">
-                  <i className="fas fa-brain" />
-                  <span>RECOMMENDATIONS</span>
-                </div>
-                <div className="db-ai-insight-text">
-                  {aiInsight.split('\n').map((line, idx) => (
-                    <p key={idx}>{line}</p>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </div>
         </div>
       </main>
     </div>

@@ -73,7 +73,7 @@ export function AboutPage() {
 
       <section className="section" style={{ background: 'var(--white)' }}>
         <div className="container">
-          <SectionHeader tag="Artisan Craftsmanship" title="The Legacy of Artisan Craftsmanship" />
+          <SectionHeader tag="Artisan Craftsmanship" title="A Legacy of Artisan Craftsmanship" />
           <p style={{
             maxWidth: 800, margin: '0 auto', textAlign: 'center',
             color: 'var(--charcoal-light)', fontSize: 17, lineHeight: 1.8,

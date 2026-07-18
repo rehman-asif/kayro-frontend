@@ -60,7 +60,7 @@ export function HomePage() {
 
       <section className="section" style={{ background: 'var(--cream)' }}>
         <div className="container">
-          <SectionHeader tag="Artisan Craftsmanship" title="The Legacy of Artisan Craftsmanship" />
+          <SectionHeader tag="Artisan Craftsmanship" title="A Legacy of Artisan Craftsmanship" />
           <p style={{
             maxWidth: 800, margin: '0 auto', textAlign: 'center',
             color: 'var(--charcoal-light)', fontSize: 17, lineHeight: 1.8,
@@ -69,6 +69,14 @@ export function HomePage() {
             where time-honoured artistry meets modern skincare science. From our signature soaps
             to our nourishing serums and botanical oils, each formulation is meticulously
             prepared with exceptional care, precision, and attention to detail.
+          </p>
+          <p style={{
+            maxWidth: 800, margin: '16px auto 0', textAlign: 'center',
+            color: 'var(--charcoal-light)', fontSize: 17, lineHeight: 1.8,
+          }}>
+            We believe true luxury is never rushed. Every ingredient is intentionally selected,
+            every formulation carefully perfected, and every product is created to deliver an
+            elevated skincare experience that embodies purity, elegance, and uncompromising quality.
           </p>
         </div>
       </section>

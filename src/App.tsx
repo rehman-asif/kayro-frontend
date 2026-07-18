@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
@@ -21,6 +22,14 @@ import { AdminResetPasswordPage } from './pages/AdminResetPasswordPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { AdminHubSpotPage } from './pages/AdminHubSpotPage';
+import { syncPublishedProductsFromApi } from './services/productService';
+
+function ProductSync() {
+  useEffect(() => {
+    void syncPublishedProductsFromApi();
+  }, []);
+  return null;
+}
 
 export default function App() {
   return (
@@ -28,6 +37,7 @@ export default function App() {
       <AuthProvider>
         <CartProvider>
           <AppProvider>
+            <ProductSync />
             <Routes>
               <Route path="/login" element={<AdminLoginPage />} />
               <Route path="/admin/register" element={<AdminRegisterPage />} />
