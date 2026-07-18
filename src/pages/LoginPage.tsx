@@ -1,9 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useUser } from '../context/AuthContext';
+import { useAdmin } from '../context/AuthContext';
 
+/**
+ * Unified login used from Account icon — signs into the admin dashboard.
+ */
 export function LoginPage() {
-  const { userLogin, isLoading } = useUser();
+  const { adminLogin, isLoading } = useAdmin();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -16,11 +19,10 @@ export function LoginPage() {
     setError('');
     setSubmitting(true);
     try {
-      await userLogin(email, password);
-      navigate('/');
+      await adminLogin(email.trim(), password);
+      window.location.href = '/admin';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
-    } finally {
       setSubmitting(false);
     }
   };
@@ -38,7 +40,7 @@ export function LoginPage() {
       <div className="auth-card">
         <div className="auth-brand">
           <h1 className="auth-brand-title">Welcome Back</h1>
-          <p className="auth-brand-sub">Sign in to your account</p>
+          <p className="auth-brand-sub">Sign in to The Precious Creations dashboard</p>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -86,8 +88,14 @@ export function LoginPage() {
         </form>
 
         <p className="auth-footer-text">
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="auth-link">Create one</Link>
+          <Link to="/admin/forgot-password" className="auth-link">Forgot password?</Link>
+          {' · '}
+          <Link to="/admin/register" className="auth-link">Create admin account</Link>
+        </p>
+        <p className="auth-footer-text">
+          <button type="button" className="auth-link" onClick={() => navigate('/')}>
+            Return to store
+          </button>
         </p>
       </div>
     </div>

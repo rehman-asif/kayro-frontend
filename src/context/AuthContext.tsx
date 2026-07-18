@@ -173,3 +173,14 @@ export function useAdmin() {
   const { admin, isAdminAuthenticated, adminLogin, adminRegister, adminLogout, isLoading } = useAuth();
   return { admin, isAdminAuthenticated, adminLogin, adminRegister, adminLogout, isLoading };
 }
+
+/** Sync helper for layouts — rehydrate from session cache if React state is empty */
+export function peekCachedAdmin(): AuthUser | null {
+  try {
+    const raw = sessionStorage.getItem(ADMIN_SESSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as AuthUser;
+  } catch {
+    return null;
+  }
+}

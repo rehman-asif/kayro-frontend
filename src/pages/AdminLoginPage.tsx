@@ -1,30 +1,23 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
 
 export function AdminLoginPage() {
-  const { admin, adminLogin, isLoading } = useAdmin();
+  const { adminLogin, isLoading } = useAdmin();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Already signed in — hard navigate so AdminLayout always mounts with session
-  useEffect(() => {
-    if (!isLoading && admin) {
-      window.location.assign('/admin');
-    }
-  }, [admin, isLoading]);
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setSubmitting(true);
     try {
-      await adminLogin(email, password);
-      // Full page navigation avoids React Router / layout race conditions
-      window.location.assign('/admin');
+      await adminLogin(email.trim(), password);
+      // Hard navigation — most reliable way to land on the dashboard
+      window.location.href = '/admin';
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
       setSubmitting(false);

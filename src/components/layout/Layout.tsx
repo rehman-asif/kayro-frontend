@@ -44,7 +44,17 @@ export function AdminLayout() {
     );
   }
 
-  if (!admin) {
+  // Trust same-tab session cache so a fresh login is not bounced back to /login
+  let hasSession = !!admin;
+  if (!hasSession) {
+    try {
+      hasSession = !!sessionStorage.getItem('tpc_admin_session');
+    } catch {
+      hasSession = false;
+    }
+  }
+
+  if (!hasSession) {
     return <Navigate to="/login" replace />;
   }
 

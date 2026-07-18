@@ -57,7 +57,7 @@ export function Header() {
               <button type="button" aria-label="Search" onClick={() => openChat('productFinder')}>
                 <i className="fas fa-search" />
               </button>
-              <Link to="/user/login" aria-label="Account">
+              <Link to="/login" aria-label="Account">
                 <i className="fas fa-user" />
               </Link>
               <Link to="/cart" aria-label="Cart">
@@ -81,7 +81,7 @@ export function Header() {
         <NavLink to="/about" onClick={() => setMobileOpen(false)}>About Us</NavLink>
         <NavLink to="/blog" onClick={() => setMobileOpen(false)}>Blog</NavLink>
         <NavLink to="/contact" onClick={() => setMobileOpen(false)}>Contact</NavLink>
-        <NavLink to="/user/login" onClick={() => setMobileOpen(false)}>Account</NavLink>
+        <NavLink to="/login" onClick={() => setMobileOpen(false)}>Admin Login</NavLink>
         <NavLink to="/admin" onClick={() => setMobileOpen(false)}>AI Dashboard</NavLink>
         <NavLink to="/cart" onClick={() => setMobileOpen(false)}>Cart</NavLink>
       </div>
