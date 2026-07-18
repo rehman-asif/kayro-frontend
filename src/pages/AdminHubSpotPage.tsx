@@ -10,8 +10,10 @@ export function AdminHubSpotPage() {
   const [contact, setContact] = useState<HubSpotContact | null>(null);
   const [error, setError] = useState('');
   const [searching, setSearching] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [notFound, setNotFound] = useState(false);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -27,15 +29,39 @@ export function AdminHubSpotPage() {
     e.preventDefault();
     setError('');
     setContact(null);
+    setNotFound(false);
     setHasSearched(true);
     setSearching(true);
     try {
       const res = await hubspotService.getContactByEmail(email.trim());
       setContact(res.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to look up contact.');
+      const msg = err instanceof Error ? err.message : 'Failed to look up contact.';
+      if (msg.toLowerCase().includes('no hubspot contact')) {
+        setNotFound(true);
+        setError(msg);
+      } else {
+        setError(msg);
+      }
     } finally {
       setSearching(false);
+    }
+  };
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setError('');
+    try {
+      const res = await hubspotService.syncContact(
+        email.trim(),
+        admin?.name || email.trim().split('@')[0]
+      );
+      setContact(res.data);
+      setNotFound(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to sync contact to HubSpot.');
+    } finally {
+      setSyncing(false);
     }
   };
 
@@ -89,6 +115,10 @@ export function AdminHubSpotPage() {
             <div className="db-widget-header">
               <h2 className="db-widget-title">Contact Lookup</h2>
             </div>
+            <p className="db-welcome-sub" style={{ marginBottom: 12 }}>
+              Contacts are created when customers register on the store, or you can sync an email
+              to HubSpot from here.
+            </p>
             <form className="hs-search-form" onSubmit={(e) => void handleSearch(e)} noValidate>
               <div className="hs-search-row">
                 <input
@@ -109,6 +139,18 @@ export function AdminHubSpotPage() {
             {error && (
               <div className="auth-error" role="alert" style={{ marginTop: 16 }}>
                 <span>⚠️</span> {error}
+              </div>
+            )}
+            {notFound && (
+              <div style={{ marginTop: 14 }}>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => void handleSync()}
+                  disabled={syncing || !email.trim()}
+                >
+                  {syncing ? 'Syncing...' : 'Create / Sync to HubSpot'}
+                </button>
               </div>
             )}
             {contact && props && (

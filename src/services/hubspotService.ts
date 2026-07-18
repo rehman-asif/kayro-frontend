@@ -36,4 +36,13 @@ export const hubspotService = {
     apiFetch<{ success: boolean; data: HubSpotContact }>(
       `/hubspot/contact?email=${encodeURIComponent(email)}`
     ),
+
+  syncContact: (email: string, name?: string) =>
+    apiFetch<{ success: boolean; message: string; data: HubSpotContact }>(
+      '/hubspot/contact',
+      {
+        method: 'POST',
+        body: JSON.stringify({ email, name }),
+      }
+    ),
 };
