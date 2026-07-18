@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import type { ProductCategory, PublishedProduct, AIMarketingContent } from '../types';
 import { uploadToCloudinary } from '../services/cloudinaryService';
-import { savePublishedProduct, generateProductId } from '../services/productService';
+import { savePublishedProduct, generateProductId, publishProductToApi } from '../services/productService';
 import { getOpenAIKey } from '../services/storageService';
 
 // ─── Types ───────────────────────────────────────────────
@@ -74,6 +74,8 @@ export function ProductPublishPage() {
   // Step 5
   const [published, setPublished] = useState(false);
   const [publishedProduct, setPublishedProduct] = useState<PublishedProduct | null>(null);
+  const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState('');
 
   // ── Step 1: Image Handling ─────────────────────────────
   const handleFile = (file: File) => {
@@ -189,7 +191,7 @@ export function ProductPublishPage() {
   };
 
   // ── Step 5: Publish ────────────────────────────────────
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const product: PublishedProduct = {
       id: generateProductId(form.name),
       name: form.name.trim(),
@@ -204,9 +206,26 @@ export function ProductPublishPage() {
       marketing,
       publishedAt: new Date().toISOString(),
     };
-    savePublishedProduct(product);
-    setPublishedProduct(product);
-    setPublished(true);
+
+    setPublishing(true);
+    setPublishError('');
+    try {
+      const saved = await publishProductToApi(product);
+      setPublishedProduct(saved);
+      setPublished(true);
+    } catch (err) {
+      // Still cache locally so the admin doesn't lose work if API is briefly down
+      savePublishedProduct(product);
+      setPublishError(
+        err instanceof Error
+          ? `${err.message} (saved locally as backup)`
+          : 'Failed to save to database (saved locally as backup)'
+      );
+      setPublishedProduct(product);
+      setPublished(true);
+    } finally {
+      setPublishing(false);
+    }
   };
 
   // ── Progress guard ──────────────────────────────────────
@@ -280,21 +299,29 @@ export function ProductPublishPage() {
                   onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
                 >
-                  <div className="pp-dropzone-icon">🖼️</div>
+                  <div className="pp-dropzone-icon"><i className="fas fa-cloud-upload-alt" /></div>
                   <p className="pp-dropzone-text">Drag & drop your image here</p>
-                  <p className="pp-dropzone-sub">or click to browse — JPG, PNG, WebP (max 10MB)</p>
+                  <p className="pp-dropzone-sub">JPG, PNG, or WebP — max 10MB</p>
+                  {/* Visually hidden (not display:none) — more reliable on iOS/Android */}
                   <input
                     ref={fileInputRef}
+                    id="pp-product-image"
                     type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    className="pp-file-input"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleFile(file);
+                      e.target.value = '';
+                    }}
                   />
+                  <label htmlFor="pp-product-image" className="pp-btn pp-btn-primary pp-choose-photo">
+                    <i className="fas fa-images" /> Choose Photo from Gallery
+                  </label>
+                  <p className="pp-dropzone-hint">
+                    If your phone says &quot;denied permissions&quot;, open Settings → allow Photos/Files for your browser, then try again.
+                  </p>
                 </div>
               ) : (
                 <div className="pp-image-preview-wrap">
@@ -501,11 +528,12 @@ export function ProductPublishPage() {
                   <button
                     type="button"
                     className="pp-btn pp-btn-publish"
-                    onClick={handlePublish}
-                    disabled={!canPublish}
+                    onClick={() => void handlePublish()}
+                    disabled={!canPublish || publishing}
                   >
-                    <i className="fas fa-rocket" /> Publish Product to Store
+                    <i className="fas fa-rocket" /> {publishing ? 'Publishing...' : 'Publish Product to Store'}
                   </button>
+                  {publishError && <p className="pp-error">{publishError}</p>}
                   {!canPublish && <p className="pp-error">Please generate at least the Product Description in Step 3 before publishing.</p>}
                 </>
               ) : (
