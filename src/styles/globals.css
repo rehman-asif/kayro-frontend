@@ -1931,11 +1931,11 @@ p {
   .hero,
   .hero-landing { grid-template-columns: 1fr; }
   .hero-image,
-  .hero-landing .hero-image { min-height: 360px; }
+  .hero-landing .hero-image { min-height: 300px; }
   .hero-content,
   .hero-landing .hero-content { padding: 40px 24px; }
   .hero-landing .hero-image img,
-  .hero-landing .hero-image .optimized-image { min-height: 360px; }
+  .hero-landing .hero-image .optimized-image { min-height: 300px; }
   .split-section, .contact-grid, .product-detail, .checkout-grid { grid-template-columns: 1fr; }
   .category-grid { grid-template-columns: repeat(3, 1fr); }
   .trust-bar-grid,
