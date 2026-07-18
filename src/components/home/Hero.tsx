@@ -29,7 +29,7 @@ export function Hero() {
       <div className="hero-image">
         <OptimizedImage
           src={BRAND_IMAGES.heroProducts}
-          alt="The Precious Creations natural skincare and haircare products on stone with botanicals"
+          alt="The Precious Creations Turmeric Glow Up body lotion, rose bath salts, and handcrafted soap"
           loading="eager"
           fetchPriority="high"
           sizes="(max-width: 992px) 100vw, 50vw"
