@@ -363,9 +363,7 @@ p {
 .hero-landing {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  height: 380px;
-  max-height: 380px;
-  min-height: 0;
+  min-height: 440px;
   overflow: hidden;
   position: relative;
   background: var(--cream);

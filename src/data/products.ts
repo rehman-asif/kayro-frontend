@@ -11,16 +11,6 @@ export const CATEGORIES: (ProductCategory | 'All')[] = [
   'All', 'Serums', 'Soaps', 'Hair Care', 'Body Care', 'Bundles', 'Diffusers', 'Perfumes',
 ];
 
-export const CATEGORY_CARDS = [
-  { label: 'Serums', image: '/products/category-skincare.jpg', slug: 'Serums' },
-  { label: 'Soaps', image: '/products/category-soaps.jpg', slug: 'Soaps' },
-  { label: 'Hair Care', image: '/products/category-haircare.jpg', slug: 'Hair Care' },
-  { label: 'Body Care', image: '/products/category-bodycare.jpg', slug: 'Body Care' },
-  { label: 'Bundles', image: '/products/category-skincare.jpg', slug: 'Bundles' },
-  { label: 'Diffusers', image: '/products/category-essentialoils.jpg', slug: 'Diffusers' },
-  { label: 'Perfumes', image: '/products/soap-diffuser-collection.jpg', slug: 'Perfumes' },
-];
-
 /** Shared placeholder until the client uploads the correct product photo */
 export const PRODUCT_PLACEHOLDER_IMAGE = '/products/placeholder.svg';
 

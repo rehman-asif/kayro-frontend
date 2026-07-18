@@ -174,6 +174,9 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
           <Link to="/admin/products" className="db-nav-item">
             <i className="fas fa-boxes" /> Manage Products
           </Link>
+          <Link to="/admin/categories" className="db-nav-item">
+            <i className="fas fa-th-large" /> Categories
+          </Link>
           <Link to="/admin/publish" className="db-nav-item">
             <i className="fas fa-plus-circle" /> Publish Product
           </Link>
