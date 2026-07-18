@@ -1,21 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CATEGORIES, getProductsByCategory } from '../data/products';
+import { CATEGORIES } from '../data/products';
 import { ProductGrid } from '../components/products/ProductGrid';
 import { PageHero } from '../components/ui/PageHero';
 import { useAIChat } from '../context/AppContext';
+import { useProductCatalog } from '../context/ProductCatalogContext';
 
 export function ProductsPage() {
   const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('category') || 'All';
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const { openChat } = useAIChat();
+  const { products, loading } = useProductCatalog();
 
   useEffect(() => {
     setActiveCategory(searchParams.get('category') || 'All');
   }, [searchParams]);
 
-  const products = getProductsByCategory(activeCategory);
+  const filtered = useMemo(() => {
+    if (activeCategory === 'All') return products;
+    return products.filter((p) => p.category === activeCategory);
+  }, [products, activeCategory]);
 
   return (
     <>
@@ -56,7 +61,16 @@ export function ProductsPage() {
             </div>
           </aside>
           <main>
-            <ProductGrid products={products} />
+            {loading ? (
+              <p style={{ color: 'var(--charcoal-light)' }}>Loading products...</p>
+            ) : filtered.length === 0 ? (
+              <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--charcoal-light)' }}>
+                <p style={{ fontSize: 18, marginBottom: 8 }}>Products coming soon</p>
+                <p>Combo bestsellers will appear here. Individual products will be added with correct photos.</p>
+              </div>
+            ) : (
+              <ProductGrid products={filtered} />
+            )}
           </main>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { BRAND } from '../data/brand';
-import { getFeaturedProducts } from '../data/products';
 import { BLOG_POSTS } from '../data/blogPosts';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { ProductGrid } from '../components/products/ProductGrid';
@@ -14,10 +13,12 @@ import { Newsletter } from '../components/home/Newsletter';
 import { SplitSection } from '../components/ui/SplitSection';
 import { BlogGrid } from '../components/blog/BlogGrid';
 import { useAIChat } from '../context/AppContext';
+import { useProductCatalog } from '../context/ProductCatalogContext';
 
 export function HomePage() {
   const { openChat } = useAIChat();
-  const featured = getFeaturedProducts();
+  const { products } = useProductCatalog();
+  const featured = products.filter((p) => p.featured && !p.comingSoon);
 
   return (
     <>
@@ -29,8 +30,8 @@ export function HomePage() {
         <div className="container">
           <SectionHeader
             tag="Best Sellers"
-            title="Featured Products"
-            description="Our most loved handcrafted creations"
+            title="Featured Combos"
+            description="Our signature combo bestsellers — more products coming as photos are uploaded"
           />
           <ProductGrid products={featured} />
           <div style={{ textAlign: 'center', marginTop: 40 }}>

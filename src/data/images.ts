@@ -57,8 +57,11 @@ export function getCategoryImage(category: string): string {
 
 export function getProductImage(product: Product): string {
   // Dynamically published products have a Cloudinary imageUrl — use it first
-  if (product.imageUrl) {
+  if (product.imageUrl && !product.placeholder) {
     return product.imageUrl;
+  }
+  if (product.placeholder || product.comingSoon) {
+    return '/products/placeholder.svg';
   }
   if (PRODUCT_IMAGE_MAP[product.id]) {
     return PRODUCT_IMAGE_MAP[product.id];

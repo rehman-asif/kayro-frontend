@@ -25,7 +25,10 @@ export function ProductCard({ product }: ProductCardProps) {
       <Link to={`/product/${product.id}`}>
         <div className="product-card-image">
           {product.comingSoon && <span className="product-badge soon">Coming Soon</span>}
-          {!product.comingSoon && product.featured && <span className="product-badge">Featured</span>}
+          {!product.comingSoon && product.featured && <span className="product-badge">Best Seller</span>}
+          {product.placeholder && !product.comingSoon && (
+            <span className="product-badge soon">Photo soon</span>
+          )}
           <OptimizedImage
             src={imageSrc}
             alt={`${product.name} — ${product.category} by The Precious Creations`}

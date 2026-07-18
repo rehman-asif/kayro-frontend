@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { getProductById, formatPrice } from '../data/products';
+import { formatPrice } from '../data/products';
 import { getProductImage } from '../data/images';
 import { useCart } from '../context/CartContext';
 import { useToast, useAIChat } from '../context/AppContext';
+import { useProductCatalog } from '../context/ProductCatalogContext';
 import { OptimizedImage } from '../components/ui/OptimizedImage';
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const product = id ? getProductById(id) : undefined;
+  const { products } = useProductCatalog();
+  const product = id ? products.find((p) => p.id === id) : undefined;
   const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCart();
   const { showToast } = useToast();

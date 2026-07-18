@@ -203,6 +203,7 @@ export function ProductPublishPage() {
       featured: form.featured,
       imageUrl: imageUrl,
       isDynamic: true,
+      placeholder: false,
       marketing,
       publishedAt: new Date().toISOString(),
     };

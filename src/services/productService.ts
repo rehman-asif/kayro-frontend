@@ -75,10 +75,46 @@ export async function syncPublishedProductsFromApi(): Promise<PublishedProduct[]
   return getPublishedProducts();
 }
 
-/** Delete a published product by id */
+/** Delete a published product by id (local cache) */
 export function deletePublishedProduct(id: string): void {
   const existing = getPublishedProducts().filter((p) => p.id !== id);
   writeLocal(existing);
+}
+
+/** Update product fields via API */
+export async function updateProductOnApi(
+  id: string,
+  patch: Partial<PublishedProduct> & Record<string, unknown>
+): Promise<PublishedProduct> {
+  const res = await fetch(`${API_BASE}/products/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  });
+  const data = await res.json() as {
+    success: boolean;
+    message?: string;
+    data?: PublishedProduct;
+  };
+  if (!res.ok || !data.success || !data.data) {
+    throw new Error(data.message || 'Failed to update product');
+  }
+  savePublishedProduct(data.data);
+  return data.data;
+}
+
+/** Delete product via API + local cache */
+export async function deleteProductFromApi(id: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/products/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  const data = await res.json() as { success: boolean; message?: string };
+  if (!res.ok || !data.success) {
+    throw new Error(data.message || 'Failed to delete product');
+  }
+  deletePublishedProduct(id);
 }
 
 /** Generate a URL-safe product id from the name */

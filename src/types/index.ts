@@ -17,8 +17,11 @@ export interface Product {
   benefits?: string[];
   featured?: boolean;
   comingSoon?: boolean;
+  /** True until the client uploads the real product photo */
+  placeholder?: boolean;
   imageUrl?: string;
   isDynamic?: boolean; // true = added via publish pipeline
+  stock?: number;
 }
 
 export interface AIMarketingContent {
