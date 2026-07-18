@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { flushSync } from 'react-dom';
 import { userAuthService, adminAuthService, type AuthUser } from '../services/authService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -89,19 +90,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // ── Admin Actions ─────────────────────────────────────────────────────────────
+  // flushSync so /admin layout sees admin before navigate() runs (avoids bounce to /login)
   const adminLogin = useCallback(async (email: string, password: string) => {
     const res = await adminAuthService.login(email, password);
-    setAdmin(res.data);
+    flushSync(() => {
+      setAdmin(res.data);
+    });
   }, []);
 
   const adminRegister = useCallback(async (name: string, email: string, password: string) => {
     const res = await adminAuthService.register(name, email, password);
-    setAdmin(res.data);
+    flushSync(() => {
+      setAdmin(res.data);
+    });
   }, []);
 
   const adminLogout = useCallback(async () => {
     await adminAuthService.logout();
-    setAdmin(null);
+    flushSync(() => {
+      setAdmin(null);
+    });
   }, []);
 
   // ── Context Value ──────────────────────────────────────────────────────────────

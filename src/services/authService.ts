@@ -5,13 +5,14 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // ─── Generic Fetcher ──────────────────────────────────────────────────────────
 async function apiFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  const { headers: optionHeaders, ...rest } = options;
   const res = await fetch(`${API_BASE}${endpoint}`, {
-    credentials: 'include', // Required for httpOnly cookie-based auth
+    ...rest,
+    credentials: 'include', // Always include cookies (do not let options overwrite)
     headers: {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(optionHeaders as Record<string, string> | undefined),
     },
-    ...options,
   });
 
   const data = await res.json();

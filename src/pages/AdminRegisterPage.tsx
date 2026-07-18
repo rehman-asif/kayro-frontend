@@ -13,7 +13,7 @@ export function AdminRegisterPage() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (admin) navigate('/admin');
+    if (admin) navigate('/admin', { replace: true });
   }, [admin, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -22,7 +22,7 @@ export function AdminRegisterPage() {
     setSubmitting(true);
     try {
       await adminRegister(name, email, password);
-      navigate('/admin');
+      navigate('/admin', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed.');
     } finally {

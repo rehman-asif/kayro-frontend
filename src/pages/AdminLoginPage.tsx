@@ -13,7 +13,7 @@ export function AdminLoginPage() {
 
   useEffect(() => {
     if (admin) {
-      navigate('/admin');
+      navigate('/admin', { replace: true });
     }
   }, [admin, navigate]);
 
@@ -23,7 +23,7 @@ export function AdminLoginPage() {
     setSubmitting(true);
     try {
       await adminLogin(email, password);
-      navigate('/admin');
+      navigate('/admin', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
     } finally {
