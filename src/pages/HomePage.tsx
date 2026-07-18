@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { BRAND } from '../data/brand';
-import { BLOG_POSTS } from '../data/blogPosts';
 import { SectionHeader } from '../components/ui/SectionHeader';
 import { ProductGrid } from '../components/products/ProductGrid';
 import { AISection } from '../components/ai/AISection';
@@ -14,11 +14,18 @@ import { SplitSection } from '../components/ui/SplitSection';
 import { BlogGrid } from '../components/blog/BlogGrid';
 import { useAIChat } from '../context/AppContext';
 import { useProductCatalog } from '../context/ProductCatalogContext';
+import { fetchBlogPosts } from '../services/blogService';
+import type { BlogPost } from '../types';
 
 export function HomePage() {
   const { openChat } = useAIChat();
   const { products } = useProductCatalog();
   const featured = products.filter((p) => p.featured && !p.comingSoon);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+
+  useEffect(() => {
+    void fetchBlogPosts().then(setBlogPosts);
+  }, []);
 
   return (
     <>
@@ -91,7 +98,7 @@ export function HomePage() {
             title="Knowledge Is Beautiful"
             description="Healthy skin begins with knowledge. Explore our educational content."
           />
-          <BlogGrid posts={BLOG_POSTS.slice(0, 3)} />
+          <BlogGrid posts={blogPosts.slice(0, 3)} />
           <div style={{ textAlign: 'center', marginTop: 40 }}>
             <Link to="/blog" className="btn btn-outline">View All Articles</Link>
             <button

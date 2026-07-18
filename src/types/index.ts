@@ -52,10 +52,15 @@ export interface CartItem {
 
 export interface BlogPost {
   id: string;
+  /** Mongo document id — used for admin updates when needed */
+  mongoId?: string;
   title: string;
   excerpt: string;
   category: string;
   date: string;
+  imageUrl?: string;
+  placeholder?: boolean;
+  sortOrder?: number;
 }
 
 export type AssistantId =

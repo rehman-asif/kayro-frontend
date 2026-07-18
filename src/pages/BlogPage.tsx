@@ -1,10 +1,17 @@
-import { BLOG_POSTS } from '../data/blogPosts';
+import { useEffect, useState } from 'react';
 import { PageHero } from '../components/ui/PageHero';
 import { BlogGrid } from '../components/blog/BlogGrid';
 import { useAIChat } from '../context/AppContext';
+import { fetchBlogPosts } from '../services/blogService';
+import type { BlogPost } from '../types';
 
 export function BlogPage() {
   const { openChat, sendMessage } = useAIChat();
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+
+  useEffect(() => {
+    void fetchBlogPosts().then(setPosts);
+  }, []);
 
   const handleLearnMore = async (title: string) => {
     openChat('beauty');
@@ -33,7 +40,7 @@ export function BlogPage() {
               <i className="fas fa-sparkles" /> Ask Beauty AI
             </button>
           </div>
-          <BlogGrid posts={BLOG_POSTS} onLearnMore={handleLearnMore} />
+          <BlogGrid posts={posts} onLearnMore={handleLearnMore} />
         </div>
       </section>
     </>

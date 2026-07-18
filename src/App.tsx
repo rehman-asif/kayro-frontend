@@ -24,6 +24,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { AdminHubSpotPage } from './pages/AdminHubSpotPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
+import { AdminBlogPage } from './pages/AdminBlogPage';
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/products" element={<AdminProductsPage />} />
                   <Route path="/admin/categories" element={<AdminCategoriesPage />} />
+                  <Route path="/admin/blog" element={<AdminBlogPage />} />
                   <Route path="/admin/ai" element={<AdminAICenter />} />
                   <Route path="/admin/publish" element={<ProductPublishPage />} />
                   <Route path="/admin/hubspot" element={<AdminHubSpotPage />} />
