@@ -25,6 +25,7 @@ import { AdminHubSpotPage } from './pages/AdminHubSpotPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
 import { AdminBlogPage } from './pages/AdminBlogPage';
+import { AdminPosPage } from './pages/AdminPosPage';
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
                 <Route path="/admin/reset-password/:token" element={<AdminResetPasswordPage />} />
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminPage />} />
+                  <Route path="/admin/pos" element={<AdminPosPage />} />
                   <Route path="/admin/products" element={<AdminProductsPage />} />
                   <Route path="/admin/categories" element={<AdminCategoriesPage />} />
                   <Route path="/admin/blog" element={<AdminBlogPage />} />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
+import { AdminSidebar } from '../components/admin/AdminSidebar';
 import type { Product, ProductCategory } from '../types';
 import { CATEGORIES, formatPrice, PRODUCT_PLACEHOLDER_IMAGE } from '../data/products';
 import { getProductImage } from '../data/images';
@@ -26,12 +27,10 @@ interface EditDraft {
 
 export function AdminProductsPage() {
   const { admin, adminLogout } = useAdmin();
-  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [loggingOut, setLoggingOut] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<EditDraft | null>(null);
   const [saving, setSaving] = useState(false);
@@ -55,15 +54,6 @@ export function AdminProductsPage() {
     void load();
   }, []);
 
-  const handleLogout = async () => {
-    setLoggingOut(true);
-    try {
-      await adminLogout();
-      navigate('/login');
-    } catch {
-      navigate('/login');
-    }
-  };
 
   const startEdit = (p: Product) => {
     setEditingId(p.id);
@@ -163,36 +153,7 @@ export function AdminProductsPage() {
 
   return (
     <div className="db-root">
-      <aside className="db-sidebar">
-        <div className="db-sidebar-brand">
-          <img src="/logo.png" alt="TPC" className="db-logo" />
-          <h2 className="db-sidebar-title">Admin Dashboard</h2>
-          <p className="db-sidebar-sub">The Precious Creations</p>
-        </div>
-        <nav className="db-nav">
-          <Link to="/admin" className="db-nav-item"><i className="fas fa-chart-line" /> Dashboard</Link>
-          <Link to="/admin/products" className="db-nav-item active"><i className="fas fa-boxes" /> Manage Products</Link>
-          <Link to="/admin/categories" className="db-nav-item"><i className="fas fa-th-large" /> Categories</Link>
-          <Link to="/admin/publish" className="db-nav-item"><i className="fas fa-plus-circle" /> Publish Product</Link>
-          <Link to="/admin/ai" className="db-nav-item"><i className="fas fa-robot" /> AI Center</Link>
-          <Link to="/admin/hubspot" className="db-nav-item"><i className="fas fa-address-book" /> HubSpot CRM</Link>
-        </nav>
-        <div className="db-sidebar-footer">
-          {admin && (
-            <div className="db-admin-info">
-              <p className="db-admin-name">{admin.name}</p>
-              <p className="db-admin-email">{admin.email}</p>
-            </div>
-          )}
-          <button type="button" className="db-logout-btn" onClick={() => void handleLogout()} disabled={loggingOut}>
-            <i className="fas fa-sign-out-alt" />
-            {loggingOut ? 'Signing out...' : 'Logout'}
-          </button>
-          <Link to="/" className="db-back-link" style={{ marginTop: 10 }}>
-            <i className="fas fa-arrow-left" /> Back to Website
-          </Link>
-        </div>
-      </aside>
+      <AdminSidebar active="products" />
 
       <main className="db-main">
         <header className="db-topbar">

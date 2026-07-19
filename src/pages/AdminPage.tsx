@@ -1,9 +1,11 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
+import { AdminSidebar } from '../components/admin/AdminSidebar';
 import { getOpenAIKey, setOpenAIKey } from '../services/storageService';
-import { PRODUCTS } from '../data/products';
+import { PRODUCTS, formatPrice } from '../data/products';
 import { getPublishedProducts, syncPublishedProductsFromApi } from '../services/productService';
+import { fetchOrderStats, type OrderStats } from '../services/orderService';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -25,6 +27,7 @@ export function AdminPage() {
   const [apiKeySaved, setApiKeySaved] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
   const [stats, setStats] = useState<DashStats | null>(null);
+  const [orderStats, setOrderStats] = useState<OrderStats | null>(null);
 
   useEffect(() => {
     setHasApiKey(!!getOpenAIKey());
@@ -35,9 +38,13 @@ export function AdminPage() {
   const loadStats = async () => {
     await syncPublishedProductsFromApi();
     try {
-      const res = await fetch(`${API_BASE}/products/stats`, { credentials: 'include' });
-      if (res.ok) {
-        const json = await res.json() as { success: boolean; data: DashStats };
+      const [prodRes, sales] = await Promise.all([
+        fetch(`${API_BASE}/products/stats`, { credentials: 'include' }),
+        fetchOrderStats().catch(() => null),
+      ]);
+      if (sales) setOrderStats(sales);
+      if (prodRes.ok) {
+        const json = await prodRes.json() as { success: boolean; data: DashStats };
         if (json.success) {
           setStats(json.data);
           return;
@@ -149,69 +156,18 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
       time: 'Just now',
     },
     {
-      text: 'Cloudinary image uploads are ready for admin product publishing.',
+      text: 'POS is live — complete in-store sales under Point of Sale.',
       time: 'System',
     },
     {
-      text: 'Sales, orders, and revenue will update when checkout orders are connected.',
-      time: 'Note',
+      text: 'Cloudinary image uploads are ready for admin product publishing.',
+      time: 'System',
     },
   ];
 
   return (
     <div className="db-root">
-      <aside className="db-sidebar">
-        <div className="db-sidebar-brand">
-          <img src="/logo.png" alt="TPC" className="db-logo" />
-          <h2 className="db-sidebar-title">Admin Dashboard</h2>
-          <p className="db-sidebar-sub">The Precious Creations</p>
-        </div>
-
-        <nav className="db-nav">
-          <Link to="/admin" className="db-nav-item active">
-            <i className="fas fa-chart-line" /> Dashboard
-          </Link>
-          <Link to="/admin/products" className="db-nav-item">
-            <i className="fas fa-boxes" /> Manage Products
-          </Link>
-          <Link to="/admin/categories" className="db-nav-item">
-            <i className="fas fa-th-large" /> Categories
-          </Link>
-          <Link to="/admin/blog" className="db-nav-item">
-            <i className="fas fa-book-open" /> Education
-          </Link>
-          <Link to="/admin/publish" className="db-nav-item">
-            <i className="fas fa-plus-circle" /> Publish Product
-          </Link>
-          <Link to="/admin/ai" className="db-nav-item">
-            <i className="fas fa-robot" /> AI Center
-          </Link>
-          <Link to="/admin/hubspot" className="db-nav-item">
-            <i className="fas fa-address-book" /> HubSpot CRM
-          </Link>
-        </nav>
-
-        <div className="db-sidebar-footer">
-          {admin && (
-            <div className="db-admin-info">
-              <p className="db-admin-name">{admin.name}</p>
-              <p className="db-admin-email">{admin.email}</p>
-            </div>
-          )}
-          <button
-            type="button"
-            className="db-logout-btn"
-            onClick={() => void handleLogout()}
-            disabled={loggingOut}
-          >
-            <i className="fas fa-sign-out-alt" />
-            {loggingOut ? 'Signing out...' : 'Logout'}
-          </button>
-          <Link to="/" className="db-back-link" style={{ marginTop: '10px' }}>
-            <i className="fas fa-arrow-left" /> Back to Website
-          </Link>
-        </div>
-      </aside>
+      <AdminSidebar active="dashboard" />
 
       <main className="db-main">
         <header className="db-topbar">
@@ -229,7 +185,7 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
 
           <div className="db-actions">
             <Link
-              to="/admin/publish"
+              to="/admin/pos"
               className="btn btn-primary"
               style={{
                 display: 'flex',
@@ -242,10 +198,10 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
                 lineHeight: '1',
               }}
             >
-              <i className="fas fa-plus" /> Publish Product
+              <i className="fas fa-cash-register" /> Open POS
             </Link>
             <Link
-              to="/admin/ai"
+              to="/admin/publish"
               className="btn btn-sm btn-outline"
               style={{
                 display: 'flex',
@@ -260,7 +216,7 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
                 lineHeight: '1',
               }}
             >
-              <i className="fas fa-brain" /> Open AI Center
+              <i className="fas fa-plus" /> Publish
             </Link>
             <button
               type="button"
@@ -283,7 +239,7 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
               <h2 className="db-welcome-title">Welcome to The Precious Creations dashboard</h2>
               <p className="db-welcome-sub">
                 {admin?.name ? `Signed in as ${admin.name}. ` : ''}
-                Publish products, manage AI content, and grow your store from here.
+                Sell in-store with POS, publish products, and grow your store from here.
               </p>
             </div>
           </div>
@@ -296,10 +252,9 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
                   <i className="fas fa-chart-line" />
                 </div>
               </div>
-              <div className="db-metric-value">M0.00</div>
+              <div className="db-metric-value">{formatPrice(orderStats?.totalSales ?? 0)}</div>
               <div className="db-metric-footer">
-                <span className="db-trend-neutral">Pending orders</span>
-                <span className="db-trend-sub">live after checkout</span>
+                <span className="db-trend-neutral">All completed POS sales</span>
               </div>
             </div>
             <div className="db-metric-card">
@@ -309,9 +264,11 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
                   <i className="fas fa-coins" />
                 </div>
               </div>
-              <div className="db-metric-value">M0.00</div>
+              <div className="db-metric-value">{formatPrice(orderStats?.todayRevenue ?? 0)}</div>
               <div className="db-metric-footer">
-                <span className="db-trend-neutral">No sales yet</span>
+                <span className="db-trend-neutral">
+                  {orderStats?.todayOrderCount ? `${orderStats.todayOrderCount} sale(s) today` : 'No sales yet today'}
+                </span>
               </div>
             </div>
             <div className="db-metric-card">
@@ -321,21 +278,21 @@ Keep the tone professional, direct, and constructive. Do not output markdown cod
                   <i className="fas fa-shopping-bag" />
                 </div>
               </div>
-              <div className="db-metric-value">0</div>
+              <div className="db-metric-value">{orderStats?.orderCount ?? 0}</div>
               <div className="db-metric-footer">
-                <span className="db-trend-sub">Awaiting first order</span>
+                <span className="db-trend-sub">Completed sales</span>
               </div>
             </div>
             <div className="db-metric-card">
               <div className="db-metric-header">
-                <span className="db-metric-label">Customers</span>
+                <span className="db-metric-label">Catalog</span>
                 <div className="db-metric-icon-box" style={{ background: 'rgba(249,115,22,0.15)', color: '#F97316' }}>
-                  <i className="fas fa-users" />
+                  <i className="fas fa-boxes" />
                 </div>
               </div>
-              <div className="db-metric-value">0</div>
+              <div className="db-metric-value">{stats?.totalProducts ?? 0}</div>
               <div className="db-metric-footer">
-                <span className="db-trend-sub">Synced via HubSpot when available</span>
+                <span className="db-trend-sub">Products in store</span>
               </div>
             </div>
           </div>
