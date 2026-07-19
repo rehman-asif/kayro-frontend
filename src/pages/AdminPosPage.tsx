@@ -212,22 +212,22 @@ export function AdminPosPage() {
             <h1 className="db-topbar-title">Point of Sale</h1>
             <p className="db-topbar-date">In-store sales with live stock updates</p>
           </div>
-          <div className="db-actions" style={{ display: 'flex', gap: 8 }}>
+          <div className="db-actions pos-top-actions">
             <button
               type="button"
-              className={`btn btn-sm ${tab === 'sell' ? 'btn-primary' : 'btn-outline'}`}
+              className={`pos-tab-btn${tab === 'sell' ? ' active' : ''}`}
               onClick={() => setTab('sell')}
             >
               Sell
             </button>
             <button
               type="button"
-              className={`btn btn-sm ${tab === 'history' ? 'btn-primary' : 'btn-outline'}`}
+              className={`pos-tab-btn${tab === 'history' ? ' active' : ''}`}
               onClick={() => setTab('history')}
             >
               Sales history
             </button>
-            <button type="button" className="btn btn-sm btn-outline" onClick={() => void refresh()} disabled={loading}>
+            <button type="button" className="pos-tab-btn" onClick={() => void refresh()} disabled={loading}>
               Refresh
             </button>
           </div>
@@ -243,7 +243,7 @@ export function AdminPosPage() {
             <div className="pos-success" role="status">
               {success}
               {lastSale && (
-                <button type="button" className="btn btn-sm btn-outline" onClick={() => printReceipt(lastSale)}>
+                <button type="button" className="pos-tab-btn" onClick={() => printReceipt(lastSale)}>
                   Print receipt
                 </button>
               )}
@@ -417,11 +417,11 @@ export function AdminPosPage() {
                         ))}
                       </ul>
                       <div className="pos-history-actions">
-                        <button type="button" className="btn btn-sm btn-outline" onClick={() => printReceipt(order)}>
+                        <button type="button" className="pos-tab-btn" onClick={() => printReceipt(order)}>
                           Receipt
                         </button>
                         {order.status === 'completed' && (
-                          <button type="button" className="btn btn-sm btn-outline" onClick={() => void handleVoid(order)}>
+                          <button type="button" className="pos-tab-btn" onClick={() => void handleVoid(order)}>
                             Void & restore stock
                           </button>
                         )}

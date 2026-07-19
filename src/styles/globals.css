@@ -3838,6 +3838,38 @@ select.pp-input { appearance: none; cursor: pointer; }
 }
 
 /* ─── POS ─────────────────────────────────────────────────────────────────── */
+.pos-top-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.pos-tab-btn {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+  color: #E4E4F0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.pos-tab-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+.pos-tab-btn.active {
+  background: #C45C4A;
+  border-color: #C45C4A;
+  color: #fff;
+}
+.pos-tab-btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
 .pos-success {
   display: flex;
   align-items: center;
