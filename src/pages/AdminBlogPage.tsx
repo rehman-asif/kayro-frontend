@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAdmin } from '../context/AuthContext';
 import { AdminSidebar } from '../components/admin/AdminSidebar';
 import type { BlogPost } from '../types';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '../data/products';
@@ -23,7 +21,6 @@ interface EditDraft {
 }
 
 export function AdminBlogPage() {
-  const { admin, adminLogout } = useAdmin();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAdmin } from '../context/AuthContext';
 import { AdminSidebar } from '../components/admin/AdminSidebar';
 import { hubspotService, type HubSpotContact } from '../services/hubspotService';

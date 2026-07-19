@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useAdmin } from '../context/AuthContext';
+import { useAdmin } from '../../context/AuthContext';
 import { useState } from 'react';
 
 export type AdminNavKey =

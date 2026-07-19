@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAdmin } from '../context/AuthContext';
 import { AdminSidebar } from '../components/admin/AdminSidebar';
 import { PRODUCT_PLACEHOLDER_IMAGE } from '../data/products';
 import { uploadToCloudinary } from '../services/cloudinaryService';
@@ -22,7 +20,6 @@ interface EditDraft {
 }
 
 export function AdminCategoriesPage() {
-  const { admin, adminLogout } = useAdmin();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [loading, setLoading] = useState(true);

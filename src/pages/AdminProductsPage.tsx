@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAdmin } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import { AdminSidebar } from '../components/admin/AdminSidebar';
 import type { Product, ProductCategory } from '../types';
 import { CATEGORIES, formatPrice, PRODUCT_PLACEHOLDER_IMAGE } from '../data/products';
@@ -26,7 +25,6 @@ interface EditDraft {
 }
 
 export function AdminProductsPage() {
-  const { admin, adminLogout } = useAdmin();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
