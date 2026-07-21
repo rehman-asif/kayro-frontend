@@ -22,6 +22,10 @@ interface EditDraft {
   imageUrl: string;
   placeholder: boolean;
   previewUrl: string;
+  stock: string;
+  sku: string;
+  status: string;
+  comingSoon: boolean;
 }
 
 export function AdminProductsPage() {
@@ -64,6 +68,10 @@ export function AdminProductsPage() {
       imageUrl: p.imageUrl || PRODUCT_PLACEHOLDER_IMAGE,
       placeholder: Boolean(p.placeholder),
       previewUrl: getProductImage(p),
+      stock: String(p.stock ?? 0),
+      sku: p.sku || '',
+      status: p.status || (p.comingSoon ? 'draft' : 'active'),
+      comingSoon: Boolean(p.comingSoon),
     });
     setUploadProgress(0);
   };
@@ -113,8 +121,13 @@ export function AdminProductsPage() {
       return;
     }
     const price = Number(draft.price);
+    const stock = Number(draft.stock);
     if (!draft.name.trim() || Number.isNaN(price) || price < 0) {
       setError('Enter a valid name and price.');
+      return;
+    }
+    if (Number.isNaN(stock) || stock < 0) {
+      setError('Enter a valid stock quantity (0 or more).');
       return;
     }
     setSaving(true);
@@ -128,6 +141,10 @@ export function AdminProductsPage() {
         description: draft.description.trim(),
         imageUrl: draft.imageUrl,
         placeholder: draft.placeholder,
+        stock,
+        sku: draft.sku.trim(),
+        status: draft.status,
+        comingSoon: draft.comingSoon,
       });
       cancelEdit();
       await load();
@@ -260,6 +277,55 @@ export function AdminProductsPage() {
                           />
                         </div>
                         <div className="auth-field">
+                          <label className="auth-label" htmlFor={`stock-${p.id}`}>Stock quantity</label>
+                          <input
+                            id={`stock-${p.id}`}
+                            className="auth-input"
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={draft.stock}
+                            onChange={(e) => setDraft({ ...draft, stock: e.target.value })}
+                          />
+                          <p className="db-welcome-sub" style={{ marginTop: 6 }}>
+                            This is how many units are in the shop. POS sales reduce this automatically.
+                          </p>
+                        </div>
+                        <div className="auth-field">
+                          <label className="auth-label" htmlFor={`sku-${p.id}`}>SKU / product code</label>
+                          <input
+                            id={`sku-${p.id}`}
+                            className="auth-input"
+                            value={draft.sku}
+                            onChange={(e) => setDraft({ ...draft, sku: e.target.value })}
+                            placeholder="e.g. TPC-SOAP-001"
+                          />
+                        </div>
+                        <div className="auth-field">
+                          <label className="auth-label" htmlFor={`status-${p.id}`}>Product status</label>
+                          <select
+                            id={`status-${p.id}`}
+                            className="auth-input"
+                            value={draft.status}
+                            onChange={(e) => setDraft({ ...draft, status: e.target.value })}
+                          >
+                            <option value="active">Active</option>
+                            <option value="draft">Draft</option>
+                            <option value="out_of_stock">Out of stock</option>
+                            <option value="archived">Archived</option>
+                          </select>
+                        </div>
+                        <div className="auth-field">
+                          <label className="auth-label" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                            <input
+                              type="checkbox"
+                              checked={draft.comingSoon}
+                              onChange={(e) => setDraft({ ...draft, comingSoon: e.target.checked })}
+                            />
+                            Mark as coming soon (hidden from POS sales)
+                          </label>
+                        </div>
+                        <div className="auth-field">
                           <label className="auth-label" htmlFor={`cat-${p.id}`}>Category</label>
                           <select
                             id={`cat-${p.id}`}
@@ -317,7 +383,10 @@ export function AdminProductsPage() {
                               {p.featured ? ' · Best seller' : ''}
                               {p.placeholder ? ' · Placeholder photo' : ''}
                             </span>
-                            <span className="db-stock-count" style={{ color: '#A8A8C0' }}>{formatPrice(p.price)}</span>
+                            <span className="db-stock-count" style={{ color: '#A8A8C0' }}>
+                              {formatPrice(p.price)} · Stock {p.stock ?? 0}
+                              {p.sku ? ` · ${p.sku}` : ''}
+                            </span>
                           </div>
                         </div>
                         <p className="db-welcome-sub" style={{ margin: '0 0 10px' }}>

@@ -26,6 +26,7 @@ import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminCategoriesPage } from './pages/AdminCategoriesPage';
 import { AdminBlogPage } from './pages/AdminBlogPage';
 import { AdminPosPage } from './pages/AdminPosPage';
+import { AdminCrmPage } from './pages/AdminCrmPage';
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
                 <Route element={<AdminLayout />}>
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="/admin/pos" element={<AdminPosPage />} />
+                  <Route path="/admin/crm" element={<AdminCrmPage />} />
                   <Route path="/admin/products" element={<AdminProductsPage />} />
                   <Route path="/admin/categories" element={<AdminCategoriesPage />} />
                   <Route path="/admin/blog" element={<AdminBlogPage />} />

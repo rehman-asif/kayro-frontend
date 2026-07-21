@@ -1,4 +1,4 @@
-import { Outlet, Navigate } from 'react-router-dom';
+import { Outlet, Navigate, useLocation } from 'react-router-dom';
 import { useAdmin } from '../../context/AuthContext';
 import { TopBar } from './TopBar';
 import { Header } from './Header';
@@ -35,6 +35,7 @@ export function Layout({
 
 export function AdminLayout() {
   const { admin, isLoading } = useAdmin();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -56,6 +57,12 @@ export function AdminLayout() {
 
   if (!hasSession) {
     return <Navigate to="/login" replace />;
+  }
+
+  // POS staff can only use the POS screen
+  const role = admin?.role;
+  if (role === 'pos_staff' && location.pathname !== '/admin/pos') {
+    return <Navigate to="/admin/pos" replace />;
   }
 
   return <Outlet />;

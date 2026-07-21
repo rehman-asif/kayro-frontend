@@ -4081,6 +4081,55 @@ select.pp-input { appearance: none; cursor: pointer; }
   gap: 8px;
 }
 
+/* CRM */
+.crm-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.crm-tab {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #15151f;
+  color: #C8C8DC;
+  border-radius: 999px;
+  padding: 7px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.crm-tab.active {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.6);
+  color: #fff;
+}
+.crm-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+.crm-inline-form .auth-input { flex: 1; min-width: 140px; }
+.crm-table { display: flex; flex-direction: column; gap: 10px; }
+.crm-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-radius: 10px;
+  background: #15151f;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.crm-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+
 
 
 

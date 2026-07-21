@@ -1,20 +1,34 @@
+import { useState } from 'react';
 import { useToast } from '../../context/AppContext';
-import { saveLocally } from '../../services/storageService';
-import type { ContactFormData } from '../../types';
+import { submitContactLead } from '../../services/crmService';
 
 export function ContactForm() {
   const { showToast } = useToast();
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.currentTarget)) as unknown as ContactFormData;
-    saveLocally('contact_messages', data as unknown as Record<string, unknown>);
-    showToast("Message sent! We'll get back to you soon.");
-    e.currentTarget.reset();
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    setLoading(true);
+    try {
+      await submitContactLead({
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        message: `${data.subject || 'General'}: ${data.message}`,
+      });
+      showToast("Message sent! We'll get back to you soon.");
+      form.reset();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Could not send message.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form className="contact-form" onSubmit={handleSubmit}>
+    <form className="contact-form" onSubmit={(e) => void handleSubmit(e)}>
       <div className="form-group">
         <label htmlFor="name">Full Name</label>
         <input type="text" id="name" name="name" required />
@@ -41,7 +55,9 @@ export function ContactForm() {
         <label htmlFor="message">Message</label>
         <textarea id="message" name="message" required placeholder="How can we help you?" />
       </div>
-      <button type="submit" className="btn btn-primary btn-block">Send Message</button>
+      <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+        {loading ? 'Sending…' : 'Send Message'}
+      </button>
     </form>
   );
 }

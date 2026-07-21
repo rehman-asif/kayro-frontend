@@ -22,6 +22,9 @@ export interface Product {
   imageUrl?: string;
   isDynamic?: boolean; // true = added via publish pipeline
   stock?: number;
+  sku?: string;
+  status?: string;
+  lowStockThreshold?: number;
 }
 
 export interface AIMarketingContent {

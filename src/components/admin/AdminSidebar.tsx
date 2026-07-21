@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAdmin } from '../../context/AuthContext';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 export type AdminNavKey =
   | 'dashboard'
   | 'pos'
+  | 'crm'
   | 'products'
   | 'categories'
   | 'blog'
@@ -12,15 +13,16 @@ export type AdminNavKey =
   | 'ai'
   | 'hubspot';
 
-const NAV: { key: AdminNavKey; to: string; icon: string; label: string }[] = [
-  { key: 'dashboard', to: '/admin', icon: 'fas fa-chart-line', label: 'Dashboard' },
+const NAV: { key: AdminNavKey; to: string; icon: string; label: string; roles?: string[] }[] = [
+  { key: 'dashboard', to: '/admin', icon: 'fas fa-chart-line', label: 'Dashboard', roles: ['superadmin', 'admin', 'manager', 'sales_staff'] },
   { key: 'pos', to: '/admin/pos', icon: 'fas fa-cash-register', label: 'POS' },
-  { key: 'products', to: '/admin/products', icon: 'fas fa-boxes', label: 'Manage Products' },
-  { key: 'categories', to: '/admin/categories', icon: 'fas fa-th-large', label: 'Categories' },
-  { key: 'blog', to: '/admin/blog', icon: 'fas fa-book-open', label: 'Education' },
-  { key: 'publish', to: '/admin/publish', icon: 'fas fa-plus-circle', label: 'Publish Product' },
-  { key: 'ai', to: '/admin/ai', icon: 'fas fa-robot', label: 'AI Center' },
-  { key: 'hubspot', to: '/admin/hubspot', icon: 'fas fa-address-book', label: 'HubSpot CRM' },
+  { key: 'crm', to: '/admin/crm', icon: 'fas fa-address-card', label: 'CRM', roles: ['superadmin', 'admin', 'manager', 'sales_staff'] },
+  { key: 'products', to: '/admin/products', icon: 'fas fa-boxes', label: 'Manage Products', roles: ['superadmin', 'admin', 'manager'] },
+  { key: 'categories', to: '/admin/categories', icon: 'fas fa-th-large', label: 'Categories', roles: ['superadmin', 'admin', 'manager'] },
+  { key: 'blog', to: '/admin/blog', icon: 'fas fa-book-open', label: 'Education', roles: ['superadmin', 'admin', 'manager'] },
+  { key: 'publish', to: '/admin/publish', icon: 'fas fa-plus-circle', label: 'Publish Product', roles: ['superadmin', 'admin', 'manager'] },
+  { key: 'ai', to: '/admin/ai', icon: 'fas fa-robot', label: 'AI Center', roles: ['superadmin', 'admin', 'manager'] },
+  { key: 'hubspot', to: '/admin/hubspot', icon: 'fas fa-cloud', label: 'HubSpot Sync', roles: ['superadmin', 'admin', 'manager'] },
 ];
 
 interface AdminSidebarProps {
@@ -31,6 +33,17 @@ export function AdminSidebar({ active }: AdminSidebarProps) {
   const { admin, adminLogout } = useAdmin();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
+
+  const items = useMemo(() => {
+    const role = admin?.role || 'admin';
+    if (role === 'pos_staff') {
+      return NAV.filter((n) => n.key === 'pos');
+    }
+    if (role === 'delivery_staff') {
+      return NAV.filter((n) => n.key === 'crm' || n.key === 'dashboard');
+    }
+    return NAV.filter((n) => !n.roles || n.roles.includes(role));
+  }, [admin?.role]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -48,9 +61,12 @@ export function AdminSidebar({ active }: AdminSidebarProps) {
         <img src="/logo.png" alt="TPC" className="db-logo" />
         <h2 className="db-sidebar-title">Admin Dashboard</h2>
         <p className="db-sidebar-sub">The Precious Creations</p>
+        {admin?.role && (
+          <p className="db-sidebar-sub" style={{ color: '#A78BFA' }}>Role: {admin.role}</p>
+        )}
       </div>
       <nav className="db-nav">
-        {NAV.map((item) => (
+        {items.map((item) => (
           <Link
             key={item.key}
             to={item.to}
