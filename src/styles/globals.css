@@ -4128,6 +4128,46 @@ select.pp-input { appearance: none; cursor: pointer; }
   gap: 6px;
   align-items: center;
 }
+.crm-settings-form { margin-top: 12px; max-width: 820px; }
+.crm-settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 14px;
+}
+@media (max-width: 700px) {
+  .crm-settings-grid { grid-template-columns: 1fr; }
+}
+.crm-settings-form .auth-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.crm-pay-methods {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.crm-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: #15151f;
+  color: #C8C8DC;
+  font-size: 12px;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+.crm-check.on {
+  border-color: rgba(139, 92, 246, 0.6);
+  background: rgba(139, 92, 246, 0.18);
+  color: #fff;
+}
+.crm-check input { accent-color: #8B5CF6; }
+
 
 
 

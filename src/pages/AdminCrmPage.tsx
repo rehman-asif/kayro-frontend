@@ -31,6 +31,7 @@ import {
   updateStaff,
   voidAdminOrder,
   type AdminOrder,
+  type BusinessSettings,
   type Campaign,
   type CrmCustomer,
   type CrmDashboard,
@@ -94,7 +95,9 @@ export function AdminCrmPage() {
   const [followUps, setFollowUps] = useState<Record<string, unknown> | null>(null);
   const [notifications, setNotifications] = useState<{ id: string; title: string; message: string; createdAt: string; read: boolean }[]>([]);
   const [staff, setStaff] = useState<{ id: string; name: string; email: string; role: string; active: boolean }[]>([]);
-  const [settings, setSettings] = useState<Record<string, unknown> | null>(null);
+  const [settings, setSettings] = useState<BusinessSettings | null>(null);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsMsg, setSettingsMsg] = useState('');
   const [reports, setReports] = useState<Record<string, unknown> | null>(null);
   const [reportRange, setReportRange] = useState('monthly');
   const [q, setQ] = useState('');
@@ -132,7 +135,6 @@ export function AdminCrmPage() {
       setFollowUps(fu);
       setNotifications(n);
       if (tab === 'staff') setStaff(await fetchStaff());
-      if (tab === 'settings') setSettings(await fetchSettings());
       if (tab === 'reports' || tab === 'sales') setReports(await fetchReports(reportRange));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load CRM');
@@ -145,6 +147,55 @@ export function AdminCrmPage() {
     void reload();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, reportRange]);
+
+  useEffect(() => {
+    if (tab !== 'settings') return;
+    setSettingsMsg('');
+    void fetchSettings()
+      .then(setSettings)
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load settings'));
+  }, [tab]);
+
+  const saveSettings = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!settings) return;
+    setSettingsSaving(true);
+    setSettingsMsg('');
+    setError('');
+    try {
+      const saved = await updateSettings({
+        businessName: settings.businessName.trim(),
+        logoUrl: settings.logoUrl.trim(),
+        brandColor: settings.brandColor.trim(),
+        phone: settings.phone.trim(),
+        whatsapp: settings.whatsapp.trim(),
+        email: settings.email.trim(),
+        address: settings.address.trim(),
+        currency: settings.currency.trim() || 'LSL',
+        currencySymbol: settings.currencySymbol.trim() || 'M',
+        paymentMethods: settings.paymentMethods,
+        deliveryFee: Number(settings.deliveryFee) || 0,
+        lowStockThreshold: Number(settings.lowStockThreshold) || 0,
+      });
+      setSettings(saved);
+      setSettingsMsg('Settings saved successfully.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not save settings');
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const togglePaymentMethod = (method: string) => {
+    if (!settings) return;
+    const has = settings.paymentMethods.includes(method);
+    setSettings({
+      ...settings,
+      paymentMethods: has
+        ? settings.paymentMethods.filter((m) => m !== method)
+        : [...settings.paymentMethods, method],
+    });
+  };
 
   const templates = useMemo(() => {
     const name = waCustomer || 'Customer';
@@ -597,21 +648,67 @@ export function AdminCrmPage() {
 
           {tab === 'settings' && (
             <section className="db-widget">
-              <h2 className="db-widget-title">Settings</h2>
+              <h2 className="db-widget-title">Business settings</h2>
+              <p className="db-welcome-sub">Update store details, currency, delivery fee, and low-stock alerts.</p>
+              {settingsMsg && <div className="pos-success" style={{ marginTop: 12 }}>{settingsMsg}</div>}
+              {!settings && <p className="db-welcome-sub">Loading settings…</p>}
               {settings && (
-                <form className="auth-form" style={{ maxWidth: 520 }} onSubmit={(e) => { e.preventDefault(); void updateSettings(settings).then(reload); }}>
-                  {['businessName', 'phone', 'whatsapp', 'email', 'address', 'currencySymbol', 'brandColor'].map((key) => (
-                    <label key={key} className="auth-label">{key}
-                      <input className="auth-input" value={String(settings[key] ?? '')} onChange={(e) => setSettings({ ...settings, [key]: e.target.value })} />
+                <form className="crm-settings-form" onSubmit={(e) => void saveSettings(e)}>
+                  <div className="crm-settings-grid">
+                    <label className="auth-label">Business name
+                      <input className="auth-input" value={settings.businessName} onChange={(e) => setSettings({ ...settings, businessName: e.target.value })} required />
                     </label>
-                  ))}
-                  <label className="auth-label">Low stock threshold
-                    <input className="auth-input" type="number" value={Number(settings.lowStockThreshold ?? 5)} onChange={(e) => setSettings({ ...settings, lowStockThreshold: Number(e.target.value) })} />
-                  </label>
-                  <button className="btn btn-primary" type="submit">Save settings</button>
+                    <label className="auth-label">Brand color
+                      <input className="auth-input" type="color" value={settings.brandColor || '#7A2E2E'} onChange={(e) => setSettings({ ...settings, brandColor: e.target.value })} />
+                    </label>
+                    <label className="auth-label">Phone
+                      <input className="auth-input" value={settings.phone} onChange={(e) => setSettings({ ...settings, phone: e.target.value })} />
+                    </label>
+                    <label className="auth-label">WhatsApp number
+                      <input className="auth-input" value={settings.whatsapp} onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })} />
+                    </label>
+                    <label className="auth-label">Email
+                      <input className="auth-input" type="email" value={settings.email} onChange={(e) => setSettings({ ...settings, email: e.target.value })} />
+                    </label>
+                    <label className="auth-label">Logo URL
+                      <input className="auth-input" value={settings.logoUrl} onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value })} />
+                    </label>
+                    <label className="auth-label" style={{ gridColumn: '1 / -1' }}>Address
+                      <input className="auth-input" value={settings.address} onChange={(e) => setSettings({ ...settings, address: e.target.value })} />
+                    </label>
+                    <label className="auth-label">Currency code
+                      <input className="auth-input" value={settings.currency} onChange={(e) => setSettings({ ...settings, currency: e.target.value })} placeholder="LSL" />
+                    </label>
+                    <label className="auth-label">Currency symbol
+                      <input className="auth-input" value={settings.currencySymbol} onChange={(e) => setSettings({ ...settings, currencySymbol: e.target.value })} placeholder="M" />
+                    </label>
+                    <label className="auth-label">Delivery fee (M)
+                      <input className="auth-input" type="number" min={0} step="0.01" value={settings.deliveryFee} onChange={(e) => setSettings({ ...settings, deliveryFee: Number(e.target.value) })} />
+                    </label>
+                    <label className="auth-label">Low stock alert at
+                      <input className="auth-input" type="number" min={0} step={1} value={settings.lowStockThreshold} onChange={(e) => setSettings({ ...settings, lowStockThreshold: Number(e.target.value) })} />
+                    </label>
+                  </div>
+
+                  <div className="auth-label" style={{ marginTop: 8 }}>Payment methods</div>
+                  <div className="crm-pay-methods">
+                    {['cash', 'card', 'mobile_money', 'bank_transfer', 'cod'].map((method) => (
+                      <label key={method} className={`crm-check${settings.paymentMethods.includes(method) ? ' on' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={settings.paymentMethods.includes(method)}
+                          onChange={() => togglePaymentMethod(method)}
+                        />
+                        {method.replace('_', ' ')}
+                      </label>
+                    ))}
+                  </div>
+
+                  <button className="btn btn-primary" type="submit" disabled={settingsSaving} style={{ marginTop: 16 }}>
+                    {settingsSaving ? 'Saving…' : 'Save settings'}
+                  </button>
                 </form>
               )}
-              {!settings && <button type="button" className="pos-tab-btn" onClick={() => void fetchSettings().then(setSettings)}>Load settings</button>}
             </section>
           )}
         </div>

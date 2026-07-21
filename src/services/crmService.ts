@@ -216,18 +216,34 @@ export async function markNotificationsRead() {
   await parseJson(res);
 }
 
-export async function fetchSettings() {
-  const res = await fetch(`${API_BASE}/crm/settings`, { credentials: 'include' });
-  return (await parseJson<{ data: Record<string, unknown> }>(res)).data;
+export interface BusinessSettings {
+  businessName: string;
+  logoUrl: string;
+  brandColor: string;
+  phone: string;
+  whatsapp: string;
+  email: string;
+  address: string;
+  currency: string;
+  currencySymbol: string;
+  paymentMethods: string[];
+  deliveryFee: number;
+  lowStockThreshold: number;
 }
 
-export async function updateSettings(body: Record<string, unknown>) {
+export async function fetchSettings(): Promise<BusinessSettings> {
+  const res = await fetch(`${API_BASE}/crm/settings`, { credentials: 'include' });
+  return (await parseJson<{ data: BusinessSettings }>(res)).data;
+}
+
+export async function updateSettings(body: Partial<BusinessSettings>): Promise<BusinessSettings> {
   const res = await fetch(`${API_BASE}/crm/settings`, {
-    method: 'PATCH', credentials: 'include',
+    method: 'PATCH',
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-  return parseJson(res);
+  return (await parseJson<{ data: BusinessSettings }>(res)).data;
 }
 
 export async function fetchStaff() {
